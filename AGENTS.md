@@ -9,6 +9,13 @@ FIVEMORE is a vertical (portrait) survivors-like zombie game for the web (itch.i
 - One run lasts 5 minutes. A boss appears at the end. Dying or winning gives gold for permanent upgrades.
 - Hook (draft, may change): cards transform the player's single main weapon instead of adding many weapons.
 
+Game decisions are tracked in [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md). Read it before changing game rules.
+
+## Skills
+- `skills/frontend-design/SKILL.md` guides distinctive UI design and responsive design critique.
+- `skills/game-engine/SKILL.md` and its references guide browser game APIs, touch input, rendering, audio, and publishing.
+- `.agents/skills/` provides aliases to these same skill folders for Codex skill discovery.
+
 ## Tech rules
 - Plain HTML + CSS + JavaScript (ES modules). No build step, no frameworks, no external libraries unless the owner asks.
 - Rendering: Canvas 2D. Portrait layout, scale to fit phone screens (target iPhone 11 Safari).
