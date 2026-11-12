@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#111812">
+    <meta name="description" content="FIVEMORE — five minutes. Five more minutes. One more run.">
+    <title>FIVEMORE</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <a class="wordmark" href="#home" aria-label="FIVEMORE home">FIVEMORE<span class="wordmark-period">.</span></a>
+        <span class="edition">Survival / 001</span>
+      </header>
+
+      <section class="screen home-screen" id="home" aria-labelledby="game-title">
+        <div class="hero-copy">
+          <p class="eyebrow">The city fell at 05:00</p>
+          <h1 id="game-title">Five minutes.<br><em>Five more?</em></h1>
+          <p class="intro">Hold out. Get stronger. Decide when to leave.</p>
+        </div>
+
+        <div class="survivor-scene" aria-label="A survivor faces a zombie">
+          <div class="scene-caption"><span>LAST KNOWN SAFE ZONE</span><span>NO SIGNAL</span></div>
+          <img class="scene-zombie" src="assets/graphs/kenney/PNG/Zombie%201/zoimbie1_stand.png" alt="" draggable="false">
+          <img class="scene-survivor" src="assets/graphs/kenney/PNG/Survivor%201/survivor1_gun.png" alt="" draggable="false">
+          <span class="scene-coordinate">34° 03′ N &nbsp; 118° 15′ W</span>
+        </div>
+
+        <nav class="menu-actions" aria-label="Main menu">
+          <button class="menu-button menu-button-primary" type="button" data-screen="coming-soon">Play</button>
+          <button class="menu-button" type="button" data-screen="settings">Settings</button>
+          <button class="menu-button" type="button" data-screen="credits">Credits</button>
+        </nav>
+        <p class="home-footnote">One finger to move. The rest is up to you.</p>
+      </section>
+
+      <section class="screen sub-screen" id="settings" aria-labelledby="settings-title" hidden>
+        <button class="back-button" type="button" data-screen="home">Back</button>
+        <p class="eyebrow">Field equipment</p>
+        <h1 id="settings-title">Settings</h1>
+        <div class="settings-list">
+          <label class="setting-row" for="music-volume">
+            <span><strong>Music</strong><small>Background track</small></span>
+            <input id="music-volume" type="range" min="0" max="100" value="70">
+            <output for="music-volume">70%</output>
+          </label>
+          <label class="setting-row" for="sfx-volume">
+            <span><strong>Sound effects</strong><small>Game sounds</small></span>
+            <input id="sfx-volume" type="range" min="0" max="100" value="80">
+            <output for="sfx-volume">80%</output>
+          </label>
+          <label class="setting-row mute-row" for="mute-audio">
+            <span><strong>Mute audio</strong><small>Silence all sound</small></span>
+            <input id="mute-audio" type="checkbox" role="switch">
+          </label>
+        </div>
+        <p class="screen-note">Your sound settings stay on this device.</p>
+      </section>
+
+      <section class="screen sub-screen" id="credits" aria-labelledby="credits-title" hidden>
+        <button class="back-button" type="button" data-screen="home">Back</button>
+        <p class="eyebrow">People behind the supplies</p>
+        <h1 id="credits-title">Credits</h1>
+        <div class="credit-entry">
+          <img src="assets/graphs/kenney/PNG/Survivor%201/survivor1_stand.png" alt="" width="42" height="52">
+          <p><strong>Top-down Shooter Pack</strong><br>Kenney<br><span>Creative Commons Zero (CC0)</span></p>
+        </div>
+        <a class="credit-link" href="https://kenney.nl/assets/top-down-shooter" target="_blank" rel="noreferrer">Visit Kenney.nl</a>
+      </section>
+
+      <section class="screen sub-screen" id="coming-soon" aria-labelledby="coming-title" hidden>
+        <button class="back-button" type="button" data-screen="home">Back</button>
+        <p class="eyebrow">Transmission received</p>
+        <h1 id="coming-title">Game coming soon</h1>
+        <p class="screen-note">The safe zone is being prepared. Check back for your first run.</p>
+        <img class="coming-zombie" src="assets/graphs/kenney/PNG/Zombie%201/zoimbie1_stand.png" alt="A zombie waits beyond the safe zone" width="74" height="96">
+      </section>
+
+      <footer class="site-footer"><span>FIVEMORE</span><span>Stay for one more.</span></footer>
+    </main>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
