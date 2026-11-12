@@ -46,3 +46,4 @@ src/
 - After each task: list changed files and what to test on a phone.
 - Keep a short changelog in CHANGELOG.md (date + one line).
 - If a request is unclear, ask one short question before coding.
+- Missing variants: derive from existing sprites via tint/scale/flip. Never draw new art.
