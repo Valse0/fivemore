@@ -1,0 +1,37 @@
+import { OBSTACLE_RADII } from "./config.js";
+
+const CELL_SIZE = 192;
+const OBJECT_TYPES = ["crate", "barrel", "rock", "tree", "flowers"];
+
+function objectInCell(gx, gy) {
+  const hash = (gx * 73856093 ^ gy * 19349663) >>> 0;
+  if (hash % 7 !== 0) return null;
+  const type = OBJECT_TYPES[(hash >>> 4) % OBJECT_TYPES.length];
+  if (type === "flowers") return null;
+  return { x: gx * CELL_SIZE + 96, y: gy * CELL_SIZE + 96, radius: OBSTACLE_RADII[type] };
+}
+
+function collides(x, y, radius) {
+  const minX = Math.floor((x - radius - 20) / CELL_SIZE);
+  const maxX = Math.floor((x + radius + 20) / CELL_SIZE);
+  const minY = Math.floor((y - radius - 20) / CELL_SIZE);
+  const maxY = Math.floor((y + radius + 20) / CELL_SIZE);
+  for (let gy = minY; gy <= maxY; gy += 1) {
+    for (let gx = minX; gx <= maxX; gx += 1) {
+      const obstacle = objectInCell(gx, gy);
+      if (!obstacle) continue;
+      const dx = x - obstacle.x;
+      const dy = y - obstacle.y;
+      const combined = radius + obstacle.radius;
+      if (dx * dx + dy * dy < combined * combined) return true;
+    }
+  }
+  return false;
+}
+
+export function moveCircle(entity, dx, dy, radius) {
+  const nextX = entity.x + dx;
+  if (!collides(nextX, entity.y, radius)) entity.x = nextX;
+  const nextY = entity.y + dy;
+  if (!collides(entity.x, nextY, radius)) entity.y = nextY;
+}

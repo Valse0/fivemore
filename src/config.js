@@ -5,6 +5,8 @@ export const WORLD_SCALE = Number.isFinite(requestedScale) && requestedScale > 0
   ? requestedScale
   : 0.7;
 export const AIM_ASSIST_DEG = 15;
+export const OBSTACLE_RADII = { crate: 18, barrel: 14, rock: 20, tree: 14 };
+export const PLAYER_COLLIDER_RADIUS = 14;
 export const MAX_PARTICLES = 300;
 let outputPixelRatio = 1;
 

@@ -1,5 +1,6 @@
 import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
+import { moveCircle } from "./obstacles.js";
 
 export const MAX_ENEMIES = 150;
 const CELL_SIZE = 96;
@@ -91,8 +92,7 @@ export function updateEnemies(player, dt, time, width, height) {
     const dx = player.x - e.x; const dy = player.y - e.y;
     const distance = Math.hypot(dx, dy) || 1;
     e.angle = Math.atan2(dy, dx);
-    e.x += dx / distance * e.speed * dt;
-    e.y += dy / distance * e.speed * dt;
+    moveCircle(e, dx / distance * e.speed * dt, dy / distance * e.speed * dt, e.radius);
   }
   rebuildEnemyHash();
 }
