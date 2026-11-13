@@ -1,4 +1,5 @@
-import { quantizeDirection, snapWorldPixel, snapWorldSize } from "./config.js";
+import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS } from "./config.js";
+import { sprites, drawFrame, frameCount } from "./assets.js";
 
 export const MAX_ENEMIES = 150;
 const CELL_SIZE = 96;
@@ -8,13 +9,14 @@ const TYPES = {
   runner: { hp: 19, speed: 79, radius: 12, xp: 1, scale: 0.76 },
 };
 const enemies = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, hp: 0, speed: 0, radius: 0, xp: 0, type: 0, angle: 0, next: -1, flash: 0 }));
-const corpses = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, angle: 0, type: 0, life: 0 }));
+const corpses = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, angle: 0, type: 0, life: 0, animation: 0 }));
 const bucketHeads = new Int16Array(HASH_SIZE);
 const typeIndex = { walker: 0, runner: 1 };
 let spawnClock = 0;
 let spawnOrdinal = 0;
 let activeCount = 0;
 let kills = 0;
+let animationTime = 0;
 
 function hash(x, y) {
   const cx = Math.floor(x / CELL_SIZE);
@@ -72,12 +74,13 @@ export function damageEnemy(index, damage) {
   enemy.hp -= damage; enemy.flash = 0.06;
   if (enemy.hp > 0) return false;
   spawnParticles(enemy.x, enemy.y, 12, "blood");
-  for (let i = 0; i < MAX_ENEMIES; i += 1) if (!corpses[i].active) { corpses[i].active = true; corpses[i].x = enemy.x; corpses[i].y = enemy.y; corpses[i].angle = enemy.angle; corpses[i].type = enemy.type; corpses[i].life = 0.5; break; }
+  for (let i = 0; i < MAX_ENEMIES; i += 1) if (!corpses[i].active) { corpses[i].active = true; corpses[i].x = enemy.x; corpses[i].y = enemy.y; corpses[i].angle = enemy.angle; corpses[i].type = enemy.type; corpses[i].life = 0.5; corpses[i].animation = 0; break; }
   enemy.active = false; activeCount -= 1; kills += 1;
   return true;
 }
 
 export function updateEnemies(player, dt, time, width, height) {
+  animationTime += dt;
   spawnClock -= dt;
   const interval = Math.max(0.34, 1.18 - Math.floor(time / 30) * 0.09);
   while (spawnClock <= 0 && activeCount < MAX_ENEMIES) { spawn(player, width, height, time); spawnClock += interval; }
@@ -98,9 +101,18 @@ export function drawEnemies(ctx, image, player, viewWidth, viewHeight, runnerIma
   for (let i = 0; i < MAX_ENEMIES; i += 1) {
     const corpse = corpses[i]; if (!corpse.active) continue;
     const x = snapWorldPixel(corpse.x); const y = snapWorldPixel(corpse.y);
-    const size = snapWorldSize(60);
-    ctx.globalAlpha = corpse.life / 0.5; ctx.save(); ctx.translate(x, y); ctx.rotate(quantizeDirection(corpse.angle + Math.PI / 2));
-    ctx.drawImage(corpse.type ? runnerImage : image, -size / 2, -size / 2, size, size); ctx.restore();
+    const sprite = [sprites.walker, sprites.runner, sprites.tank, sprites.spitter, sprites.boss][corpse.type] || sprites.walker;
+    const size = snapWorldSize(DRAW_SIZES[["walker", "runner", "tank", "spitter", "boss"][corpse.type] || "walker"]);
+    ctx.globalAlpha = corpse.life / 0.5; ctx.save(); ctx.translate(x, y);
+    if (USE_V2_ASSETS) {
+      const count = frameCount(sprite); const deathStart = Math.max(0, count - 3);
+      if (Math.cos(corpse.angle) < 0) ctx.scale(-1, 1);
+      drawFrame(ctx, sprite, Math.min(count-1, deathStart + Math.floor(corpse.animation * 8)), -size / 2, -size / 2, size, size);
+    } else {
+      const legacySize=snapWorldSize(60); ctx.rotate(quantizeDirection(corpse.angle+Math.PI/2));
+      ctx.drawImage(corpse.type ? runnerImage : image, -legacySize/2, -legacySize/2, legacySize, legacySize);
+    }
+    ctx.restore();
   }
   for (let i = 0; i < MAX_ENEMIES; i += 1) {
     const e = enemies[i];
@@ -109,17 +121,26 @@ export function drawEnemies(ctx, image, player, viewWidth, viewHeight, runnerIma
     const y = snapWorldPixel(e.y);
     if (x < player.x - viewWidth / 2 - 56 || y < player.y - viewHeight / 2 - 56
       || x > player.x + viewWidth / 2 + 56 || y > player.y + viewHeight / 2 + 56) continue;
-    const sprite = e.type ? runnerImage : image;
-    const size = snapWorldSize(64 * (e.type ? TYPES.runner.scale : 1));
+    const name = ["walker", "runner", "tank", "spitter", "boss"][e.type] || "walker";
+    const sprite = USE_V2_ASSETS ? sprites[name] : (e.type ? runnerImage : image);
+    const size = USE_V2_ASSETS ? snapWorldSize(DRAW_SIZES[name] * (name === "runner" ? TYPES.runner.scale / 0.76 : 1))
+      : snapWorldSize(64 * (e.type ? TYPES.runner.scale : 1));
     if (e.flash > 0) ctx.globalAlpha = 0.45;
-    ctx.save(); ctx.translate(x, y); ctx.rotate(quantizeDirection(e.angle + Math.PI / 2));
-    ctx.drawImage(sprite || image, -size / 2, -size / 2, size, size); ctx.restore();
+    ctx.save(); ctx.translate(x, y);
+    if (USE_V2_ASSETS) {
+      if (Math.cos(e.angle) < 0) ctx.scale(-1, 1);
+      const frames = frameCount(sprite); const frame = Math.floor(animationTime * 8) % Math.max(1, frames - 2);
+      drawFrame(ctx, sprite, frame, -size / 2, -size / 2, size, size);
+    } else {
+      ctx.rotate(quantizeDirection(e.angle+Math.PI/2)); ctx.drawImage(sprite || image, -size/2, -size/2, size, size);
+    }
+    ctx.restore();
     ctx.globalAlpha = 1;
   }
 }
 
 export function updateCorpses(dt) {
-  for (let i = 0; i < MAX_ENEMIES; i += 1) if (corpses[i].active) { corpses[i].life -= dt; if (corpses[i].life <= 0) corpses[i].active = false; }
+  for (let i = 0; i < MAX_ENEMIES; i += 1) if (corpses[i].active) { corpses[i].life -= dt; corpses[i].animation = Math.min(0.375, corpses[i].animation + dt); if (corpses[i].life <= 0) corpses[i].active = false; }
 }
 
 export function getEnemies() { return enemies; }
