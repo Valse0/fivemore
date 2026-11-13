@@ -12,6 +12,7 @@ export const ARENA_H = 2000;
 export const ARENA_EDGE_WIDTH = 8;
 export const ARENA_EDGE_COLOR = "#302923";
 export const ARENA_EDGE_ACCENT = "#d5a653";
+export const WEAPON_MUZZLE_OFFSET = 40;
 export const PLAYER_HURT_DURATION = 0.15;
 export const PLAYER_HURT_TINT_ALPHA = 0.45;
 export const PLAYER_HURT_RECOIL_DISTANCE = 6;

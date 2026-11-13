@@ -1,5 +1,5 @@
 import { damageEnemy, forNearby, getEnemies } from "./enemies.js";
-import { AIM_ASSIST_DEG, quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS } from "./config.js";
+import { AIM_ASSIST_DEG, WEAPON_MUZZLE_OFFSET, quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { spawnParticles } from "./particles.js";
 import { pistolShot, bulletHit, zombieDeath } from "./sfx.js";
@@ -54,8 +54,8 @@ function fire(player, viewWidth, viewHeight) {
   if (!bullet) return;
   const angle = candidate ? Math.atan2(candidate.y - player.y, candidate.x - player.x) : player.angle;
   bullet.active = true;
-  bullet.x = player.x + Math.cos(angle) * 40;
-  bullet.y = player.y + Math.sin(angle) * 40;
+  bullet.x = player.x + Math.cos(angle) * WEAPON_MUZZLE_OFFSET;
+  bullet.y = player.y + Math.sin(angle) * WEAPON_MUZZLE_OFFSET;
   bullet.vx = Math.cos(angle) * BULLET_SPEED; bullet.vy = Math.sin(angle) * BULLET_SPEED; bullet.life = 1.6;
   player.shotAngle = angle; player.firing = 0.08; player.recoil = 0.05;
   pistolShot();

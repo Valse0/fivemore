@@ -4,7 +4,7 @@ import { drawEnemies, drawSpits, getEnemyCount, getKillCount, getEnemies, getEne
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
-import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, isInsideArena } from "./config.js";
+import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, WEAPON_MUZZLE_OFFSET, isInsideArena } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { drawParticles, updateParticles } from "./particles.js";
 import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
@@ -205,11 +205,11 @@ function render() {
       context.globalCompositeOperation = "lighter";
       context.globalAlpha = Math.min(1, player.firing / 0.08);
       if (USE_V2_ASSETS && sprites.muzzle.complete && sprites.muzzle.naturalWidth) {
-        const size = snapWorldSize(DRAW_SIZES.muzzle); context.translate(snapWorldPixel(player.x + Math.cos(player.shotAngle) * 40), snapWorldPixel(player.y + Math.sin(player.shotAngle) * 40));
+        const size = snapWorldSize(DRAW_SIZES.muzzle); context.translate(snapWorldPixel(player.x + Math.cos(player.shotAngle) * WEAPON_MUZZLE_OFFSET), snapWorldPixel(player.y + Math.sin(player.shotAngle) * WEAPON_MUZZLE_OFFSET));
         context.rotate(quantizeDirection(player.shotAngle));
         drawFrame(context, sprites.muzzle, Math.floor(visualTime * 30) % frameCount(sprites.muzzle), -size/2, -size/2, size, size); context.restore();
       } else {
-      context.translate(snapWorldPixel(player.x + Math.cos(player.shotAngle) * 40), snapWorldPixel(player.y + Math.sin(player.shotAngle) * 40));
+      context.translate(snapWorldPixel(player.x + Math.cos(player.shotAngle) * WEAPON_MUZZLE_OFFSET), snapWorldPixel(player.y + Math.sin(player.shotAngle) * WEAPON_MUZZLE_OFFSET));
       context.rotate(quantizeDirection(player.shotAngle));
       context.fillStyle = "#f6ce67";
       context.beginPath(); context.moveTo(0, 0); context.lineTo(14, -4); context.lineTo(10, 0); context.lineTo(14, 4); context.closePath(); context.fill();

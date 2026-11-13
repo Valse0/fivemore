@@ -2,6 +2,7 @@
 - 2026-11-13 17:01 Peru: Removed the stuck hurt pose and added configured red hit tint and collision-safe recoil.
 - 2026-11-13 16:32 Peru: Documented the separate Agent Sprite Forge installation, asset test, API checks, and local credential setup.
 # Changelog
+- 2026-11-13 19:31 Peru: Centralized muzzle offset so initial bullets and muzzle placement share the same configured origin.
 - 2026-11-13 19:28 Peru: Added a configured 1600×2000 arena, constrained actors/spawns/props, and rendered a visible boundary.
 - 2026-11-13 19:24 Peru: Suppressed automatic shots unless at least one enemy is visible and restricted aim candidates to the viewport.
 - 2026-11-13 18:21 Peru: Fixed survivor idle animation on frame one while preserving walk and death animation selection.
