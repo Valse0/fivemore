@@ -1,6 +1,6 @@
 import { initializeInput, readMovement, showInput } from "./input.js";
 import { player, updatePlayer } from "./player.js";
-import { drawEnemies, getEnemyCount, getKillCount, forNearby, resetEnemies, updateEnemies } from "./enemies.js";
+import { drawEnemies, getEnemyCount, getKillCount, forNearby, resetEnemies, updateEnemies, updateCorpses } from "./enemies.js";
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
@@ -38,6 +38,7 @@ runnerImage.addEventListener("load", () => {
 });
 let width = 0; let height = 0; let pixelRatio = 1;
 let active = false; let initialized = false; let ended = false;
+let levelFlash = 0; let levelWave = 0;
 let previousTime = 0; let accumulator = 0; let runTime = 0;
 let fpsFrames = 0; let fpsTime = 0; let fps = 0;
 const debugFps = new URLSearchParams(location.search).get("debug") === "1";
@@ -62,6 +63,7 @@ function resize() {
 
 function resetRun() {
   player.x = 0; player.y = 0; player.angle = -Math.PI / 2; player.hp = 100; player.invulnerable = 0;
+  levelFlash = 0; levelWave = 1;
   runTime = 0; ended = false;
   resetEnemies(); resetWeapons(); resetXP(); resetHUD();
   previousTime = 0; accumulator = 0;
@@ -69,14 +71,16 @@ function resetRun() {
 
 function update(dt) {
   runTime += dt;
+  levelFlash = Math.max(0, levelFlash - dt); levelWave += dt;
   player.invulnerable = Math.max(0, player.invulnerable - dt);
   readMovement(movement);
   updatePlayer(movement, dt);
   updateEnemies(player, dt, runTime, width / WORLD_SCALE, height / WORLD_SCALE);
+  updateCorpses(dt);
   forNearby(player.x, player.y, takeContactDamage);
   updateWeapons(player, dt);
   updateParticles(dt);
-  updateXP(player, dt);
+  if (updateXP(player, dt)) { player.hp = Math.min(100, player.hp + 10); levelFlash = 0.16; levelWave = 0; }
   updateHUD(runTime, player.hp);
   if (player.hp <= 0 || runTime >= 300) {
     ended = true;
@@ -103,6 +107,10 @@ function render() {
   drawEnemies(context, runnerImage, player, viewWidth, viewHeight, tintedRunner);
   drawBullets(context, player, viewWidth, viewHeight);
   drawParticles(context, player, viewWidth, viewHeight);
+  if (levelWave < 0.65) {
+    context.globalAlpha = 1 - levelWave / 0.65; context.strokeStyle = "#fff4c7"; context.lineWidth = 2 / WORLD_SCALE;
+    context.beginPath(); context.arc(0, 0, 24 + levelWave * 190, 0, Math.PI * 2); context.stroke(); context.globalAlpha = 1;
+  }
   if (playerImage.complete && playerImage.naturalWidth) {
     if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
     context.save(); context.translate(-Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0), -Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0));
@@ -115,6 +123,7 @@ function render() {
     }
     context.restore(); context.globalAlpha = 1;
   }
+  if (levelFlash > 0) { context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0); context.globalAlpha = levelFlash * 0.35 / 0.16; context.fillStyle = "#fff4c7"; context.fillRect(0, 0, width, height); context.globalAlpha = 1; }
 }
 
 function frame(timestamp) {

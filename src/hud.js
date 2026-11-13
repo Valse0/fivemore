@@ -23,6 +23,7 @@ export function updateHUD(time, hp) {
   hpFill.style.width = `${Math.max(0, hp)}%`;
   hpLabel.textContent = `${Math.ceil(Math.max(0, hp))} HP`;
   xpFill.style.width = `${progression.xp / progression.needed * 100}%`;
+  xpFill.style.transform = progression.pulse > 0 ? "scaleY(1.8)" : "scaleY(1)";
   levelLabel.textContent = `LV ${progression.level}`;
   if (progression.toast > 0) { toast.hidden = false; lastToast = progression.toast; }
   else if (lastToast > 0) { toast.hidden = true; lastToast = 0; }
