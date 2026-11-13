@@ -1,4 +1,5 @@
 import { spawnParticles } from "./particles.js";
+import { xpPickup, levelUp } from "./sfx.js";
 
 const MAX_GEMS = 150;
 const gems = Array.from({ length: MAX_GEMS }, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, age: 0, value: 1, color: 0, scale: 1 }));
@@ -45,9 +46,11 @@ export function updateXP(player, dt) {
     }
     if (distance < 23) {
       gem.active = false; progression.xp += gem.value; progression.pulse = 0.18; spawnParticles(gem.x, gem.y, 4, "spark");
+      xpPickup();
       while (progression.xp >= progression.needed) {
         progression.xp -= progression.needed; progression.level += 1;
         progression.needed = Math.ceil(progression.needed * 1.3); progression.toast = 1.6; leveled = true;
+        levelUp();
       }
     }
   }

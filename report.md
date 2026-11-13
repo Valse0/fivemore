@@ -1,64 +1,65 @@
-# Combat core report — 2026-11-13
+# Game Feel Update — 2026-11-13
 
 ## Summary
 
-Part A reworks the procedural soundtrack to a 104 BPM, 28-bar (about 64.6 s) synthwave loop in A minor, with Am–F–C–G bass, kick/snare/hat rhythm, a bar 9 motif, and bar 17 pad. The existing start/stop, volume, gesture gate, fade, and mute wiring remain in place.
+Implemented the camera zoom, directional pistol feel, pooled combat particles, enemy death and XP pickup feedback, level-up heal/visuals, synthesized sound effects, and a gameplay music arrangement. No card system was added, and no menu or support screen content was changed. The camera uses a 1.5× world scale, yielding a nominal 42.7 px player on a 390 px wide screen from the existing 64 px sprite.
 
-Part B adds up to 150 pooled Walker and Runner enemies, wave-scaled spawning, player contact damage and brief invulnerability, nearest-target pistol fire, pooled bullets and XP gems, XP leveling, HUD, run timer, death/retry/menu screen, five-minute survival placeholder, and `?debug=1` enemy/bullet counts. The existing menu content and navigation remain in place.
+Four implementation commits were created, one per part: `a33aba1` (A), `5f4ef78` (B), `03a9fd6` (C), and the audio/report commit (D).
 
-The extra Runner tint is derived from the Kenney zombie sprite. No audio files, frameworks, or external art were added. Gem art uses the explicitly permitted tiny code-drawn fallback; bullet art is a 2 × 6 px tracer.
+## Skills used (concrete techniques from each SKILL.md)
 
-## Skills used
-
-- **game-engine:** Kept the existing `requestAnimationFrame` loop and fixed 1/60 s simulation step with capped elapsed time; used fixed-capacity enemy, bullet, and gem pools; capped active enemies at 150; rebuilt a fixed-size spatial hash for contact and projectile broad-phase checks; retained pointer-based touch input and user-gesture audio startup; kept update and draw work bounded by pool capacities.
-- **frontend-design:** Kept HUD labels short and task-focused; used high-contrast meter fills and restrained colors drawn from the existing game palette; placed controls against iPhone safe-area insets; made game-end actions explicit and touch-sized; limited the new overlay and toast to actionable state changes.
+- **game-engine:** Kept the existing requestAnimationFrame/fixed-step update structure; used fixed-capacity object pools for particles and existing bullets/enemies/gems; derived the camera from canvas dimensions and device pixel ratio; generated effects and sound through Canvas 2D and Web Audio; retained the existing user-gesture audio unlock.
+- **frontend-design:** Kept feedback legible and restrained in the existing HUD language; used brief action-triggered motion (pickup pulse, toast, ring, and flash) instead of adding persistent visual clutter; preserved the current portrait layout and menu/support screens.
 
 ## Changed files
 
-- `src/music.js` — procedural rhythm, bass, lead, pad, and compressor arrangement.
-- `src/enemies.js` — Walker/Runner stats, pool, ring spawning, hash grid, and sprite rendering.
-- `src/weapons.js` — nearest-target pistol, pooled bullets, collision and tracer rendering.
-- `src/xp.js` — pooled drops, magnet pickup, leveling, toast timing, and gem rendering.
-- `src/player.js` — player HP and invulnerability state.
-- `src/hud.js` — run HUD and end-screen updates.
-- `src/scene.js` — game loop integration, damage, run timing, rendering, and debug counts.
-- `src/main.js` — reusable support heart on both the menu and run-end screen.
-- `index.html` — game HUD, toast, and run-end controls.
-- `styles.css` — phone-safe HUD and run-end presentation.
-- `CHANGELOG.md` — Part A and Part B entries.
-- `report.md` — copy of this report.
+- `src/config.js` — centralized `WORLD_SCALE`, `AIM_ASSIST_DEG`, and particle cap.
+- `src/scene.js` — scaled world camera, level-up feedback, particle drawing/update, hurt and ambient sounds, gameplay music time, run-end fade.
+- `src/player.js`, `src/weapons.js` — retained facing, aim assist, straight bullets, firing pose, recoil and flash, combat sparks, shot/hit/death sounds.
+- `src/particles.js` — fixed 300-slot particle pool and pre-rendered particle atlas.
+- `src/enemies.js` — fixed enemy/corpse storage, death bursts, fading corpses, brief hit flash state.
+- `src/xp.js`, `src/hud.js` — pre-rendered faceted colored gems, pop/bob/pulse, attraction, XP feedback, 10 HP level heal trigger.
+- `src/audio.js`, `src/sfx.js`, `src/music.js` — effects bus routing, synthesized SFX, voice limit, gameplay music mode and intensity.
+- `CHANGELOG.md` — one entry for each part.
+- `reports/2026-11-13-game-feel.md`, `report.md` — this report and its requested copy.
 
 ## Commands run
 
-- Read `AGENTS.md`, `docs/GAME_DESIGN.md`, `assets/SPRITES.md`, `.agents/skills/game-engine/SKILL.md`, and `.agents/skills/frontend-design/SKILL.md`.
-- Inspected existing source, menu, styles, and Kenney sprite inventory.
-- `node --check` on `src/music.js`, `src/scene.js`, `src/enemies.js`, `src/weapons.js`, `src/xp.js`, `src/hud.js`, and `src/main.js` — succeeded.
-- `git diff --check` — succeeded.
-- `file` on Kenney tile images — succeeded.
-- Attempted a Python/Pillow image check — failed; see exact error below.
-- Part A commit: `ab8a323` (`Rework procedural synthwave music`).
+- Read project instructions, design/sprite docs, and both requested skills with `cat`.
+- Inspected source/status with `rg`, `sed`, and `git status`/`git diff`.
+- Applied source edits with `apply_patch` and a heredoc write for `src/xp.js` and this report.
+- Created four commits with `git commit`.
+- No tests, builds, or runtime verification were run.
 
 ## Problems and errors (exact text)
 
-The optional Python image-inspection command failed because Pillow is not installed:
-
-```text
-ModuleNotFoundError: No module named 'PIL'
-```
-
-The selected tile was not suitable as an XP gem, so the implementation uses the request's tiny code-drawn gem fallback. No other command errors occurred. Browser and physical iPhone playtesting have not been run.
+- An early Part B patch did not apply because its context did not match: `Script error: apply_patch verification failed: Failed to find expected lines in /home/alisaimdemir02/fivemore/src/weapons.js: let bulletX = 0; let bulletY = 0; let hitIndex = -1;`
+- Re-read `src/weapons.js`, reapplied the change against its actual contents, and continued. No part was abandoned.
+- No test or build errors were produced because none were run.
 
 ## How to test on iPhone
 
-1. Open the static game in Safari and tap Play. Drag in the lower half of the screen and confirm movement while the survivor remains centered.
-2. Wait for enemies to enter from beyond the screen edges. Confirm Walkers approach, the smaller tinted Runners begin appearing after 1:00, and the pistol fires automatically toward the nearest visible target.
-3. Let an enemy touch the player. Confirm the HP bar decreases and the player flashes during the short invulnerability window.
-4. Move near a dropped gem. Confirm it is pulled toward the player, collected, and advances the XP meter; collect enough to see the level-up toast.
-5. Confirm the HUD remains inside the top safe area, the pause button remains reachable, and the joystick responds without scrolling the page.
-6. For a quick end-screen check, allow HP to reach zero; verify time and kills, Try again, Menu, and the support heart. A full run should show “You survived” at 5:00.
-7. Open with `?debug=1` and verify FPS plus active enemy and bullet counts; without it, the counter should be hidden.
-8. On the menu, start audio with a tap; listen for the beat and layered entrances, then check volume and mute in Settings.
+1. Open the static-hosted game on an iPhone 11 Safari at 390 × 844 CSS px and start a run. Check that the survivor is about 40–48 px tall and the spawn ring stays outside the visible play area.
+2. Drag the lower-screen joystick, stop, and confirm the survivor keeps facing the last movement direction and fires that way. Move an enemy near the 6° aim cone and check the slight snap; bullets should travel straight.
+3. Watch a shot at normal speed: survivor switches to the gun pose, muzzle flashes, and recoils briefly. Check bullet readability and hit sparks.
+4. Defeat enemies and collect gems. Confirm blue/green/purple values, pop and bob, attraction, sparkle, XP pulse, brief corpse fade, and the level-up ring/flash/toast plus 10 HP recovery.
+5. With sound unmuted, start from a tap and listen for shots, hits, deaths, occasional distant groans, pickups, level-up, hurt, game over, and gameplay music. Check mute and both volume settings, then return to the menu and confirm menu music resumes.
+6. Use `?debug=1` to watch FPS/enemy/bullet counts during a crowded run; the target is 60 fps with 150 enemies.
+
+## Config constants to tune (list with defaults)
+
+- `WORLD_SCALE`: `1.5`
+- `AIM_ASSIST_DEG`: `6`
+- `MAX_PARTICLES`: `300`
+- `MAX_ENEMIES`: `150`
+- `MAX_BULLETS`: `48`
+- `BULLET_SPEED`: `520` world units/s
+- `SPAWN_RADIUS`: `440` world units, with a viewport diagonal fallback
+- Gem pool: `150`; pickup radius: `135`; contact pickup radius: `23`
+- Fire interval: `0.5` s; damage: `18`; player move speed: `180`; max HP: `100`
+- SFX simultaneous voices: `12`; ambient groan limiter: `1.5` s
+- Gameplay music: intensity step every `30` s; boss layer from `270` s; fade-in `1.5` s
 
 ## Suggested next step
 
-Playtest enemy pacing, damage, and pickup feel on iPhone Safari, then tune those values before adding cards and the 5:00 boss encounter.
+Run the iPhone checks above and tune camera scale, gem values/drop rates, and music intensity against actual device performance and feel.

@@ -17,3 +17,4 @@
 - 2026-11-13: Zoomed the gameplay camera out by 1.5× through WORLD_SCALE.
 - 2026-11-13: Added facing-direction auto-fire, aim assist, shoot pose, recoil, muzzle flash, improved bullets, and pooled combat sparks.
 - 2026-11-13: Added pooled death bursts and fading corpses, faceted XP gems, eased pickups, and level-up feedback.
+- 2026-11-13: Added synthesized gameplay sound effects and an intensity-layered survival music mode.

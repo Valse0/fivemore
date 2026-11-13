@@ -6,6 +6,8 @@ import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
 import { WORLD_SCALE } from "./config.js";
 import { drawParticles, updateParticles } from "./particles.js";
+import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
+import { updateGameplayMusicTime, stopGameplayMusic } from "./audio.js";
 
 const TILE_SIZE = 64;
 const STEP = 1 / 60;
@@ -39,6 +41,7 @@ runnerImage.addEventListener("load", () => {
 let width = 0; let height = 0; let pixelRatio = 1;
 let active = false; let initialized = false; let ended = false;
 let levelFlash = 0; let levelWave = 0;
+let ambientClock = 0;
 let previousTime = 0; let accumulator = 0; let runTime = 0;
 let fpsFrames = 0; let fpsTime = 0; let fps = 0;
 const debugFps = new URLSearchParams(location.search).get("debug") === "1";
@@ -49,7 +52,7 @@ function takeContactDamage(enemy) {
   const dx = player.x - enemy.x; const dy = player.y - enemy.y;
   const radius = enemy.radius + 18;
   if (dx * dx + dy * dy <= radius * radius) {
-    player.hp = Math.max(0, player.hp - 12); player.invulnerable = 0.5;
+    player.hp = Math.max(0, player.hp - 12); player.invulnerable = 0.5; playerHurt();
   }
 }
 
@@ -64,6 +67,7 @@ function resize() {
 function resetRun() {
   player.x = 0; player.y = 0; player.angle = -Math.PI / 2; player.hp = 100; player.invulnerable = 0;
   levelFlash = 0; levelWave = 1;
+  ambientClock = 0;
   runTime = 0; ended = false;
   resetEnemies(); resetWeapons(); resetXP(); resetHUD();
   previousTime = 0; accumulator = 0;
@@ -71,6 +75,9 @@ function resetRun() {
 
 function update(dt) {
   runTime += dt;
+  updateGameplayMusicTime(runTime);
+  ambientClock -= dt;
+  if (ambientClock <= 0) { if (getEnemyCount() > 8 && Math.random() < 0.35) ambientGroan(420); ambientClock = 1.6; }
   levelFlash = Math.max(0, levelFlash - dt); levelWave += dt;
   player.invulnerable = Math.max(0, player.invulnerable - dt);
   readMovement(movement);
@@ -86,6 +93,7 @@ function update(dt) {
     ended = true;
     showRunEnd(runTime >= 300, runTime, getKillCount());
     active = false; showInput(false);
+    stopGameplayMusic(); gameOver();
   }
 }
 

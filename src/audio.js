@@ -1,4 +1,5 @@
-import { setVolume as setMusicVolume, start as startMenuMusic, stop as stopMenuMusic } from "./music.js";
+import { setVolume as setMusicVolume, start as startMenuMusic, stop as stopMenuMusic, setGameplayTime } from "./music.js";
+import { configureSFX } from "./sfx.js";
 
 const STORAGE_KEY = "fivemore-audio-settings";
 
@@ -103,16 +104,19 @@ export async function startAudioFromGesture() {
   }
   if (audioContext.state === "running") {
     audioUnlocked = true;
-    if (menuMusicActive) startMenuMusic(audioContext, musicBus);
+    configureSFX(audioContext, effectsBus);
+    startMenuMusic(audioContext, musicBus, menuMusicActive ? "menu" : "game");
   }
 }
 
 export function setMenuMusicActive(active) {
   menuMusicActive = Boolean(active);
   if (!audioUnlocked) return;
-  if (menuMusicActive && context?.state === "running") startMenuMusic(context, musicBus);
-  else stopMenuMusic();
+  if (context?.state === "running") startMenuMusic(context, musicBus, menuMusicActive ? "menu" : "game");
 }
+
+export function updateGameplayMusicTime(seconds) { setGameplayTime(seconds); }
+export function stopGameplayMusic() { stopMenuMusic(); }
 
 export async function playTestSound() {
   const audioContext = getContext();

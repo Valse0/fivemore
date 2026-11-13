@@ -1,6 +1,7 @@
 import { damageEnemy, forNearby, getEnemies } from "./enemies.js";
 import { AIM_ASSIST_DEG } from "./config.js";
 import { spawnParticles } from "./particles.js";
+import { pistolShot, bulletHit, zombieDeath } from "./sfx.js";
 
 const MAX_BULLETS = 48;
 const BULLET_SPEED = 520;
@@ -44,6 +45,7 @@ function fire(player) {
   bullet.active = true; bullet.x = player.x; bullet.y = player.y;
   bullet.vx = Math.cos(angle) * BULLET_SPEED; bullet.vy = Math.sin(angle) * BULLET_SPEED; bullet.life = 1.6;
   player.firing = 0.08; player.recoil = 0.05;
+  pistolShot();
 }
 
 export function updateWeapons(player, dt) {
@@ -60,7 +62,8 @@ export function updateWeapons(player, dt) {
     forNearby(bullet.x, bullet.y, findBulletHit);
     if (hitIndex !== -1) {
       spawnParticles(bullet.x, bullet.y, 5, "spark");
-      if (damageEnemy(hitIndex, 18) && killsCallback) killsCallback(enemies[hitIndex].x, enemies[hitIndex].y);
+      bulletHit();
+      if (damageEnemy(hitIndex, 18)) { zombieDeath(enemies[hitIndex].type); if (killsCallback) killsCallback(enemies[hitIndex].x, enemies[hitIndex].y); }
       bullet.active = false;
     } else if (bullet.life <= 0) bullet.active = false;
   }

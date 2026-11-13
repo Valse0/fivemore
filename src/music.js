@@ -22,6 +22,8 @@ let playing = false;
 let nodes = [];
 let teardownTimer = 0;
 let noiseBuffer = null;
+let gameMode = false;
+let gameTime = 0;
 
 function track(node) { nodes.push(node); return node; }
 
@@ -92,6 +94,22 @@ function scheduleStep(stepIndex, at) {
   const step = stepInLoop % STEPS_PER_BAR;
   const beat = Math.floor(step / 2);
   const root = ROOTS[Math.floor(bar / 4) % ROOTS.length];
+
+  if (gameMode) {
+    const intensity = Math.min(4, Math.floor(gameTime / 30));
+    const boss = gameTime >= 270;
+    if (step % 2 === 0) {
+      if (beat === 0 || (intensity > 1 && beat === 2)) kick(at, boss ? 0.22 : 0.13 + intensity * 0.018);
+      if (intensity > 0 && (step === 2 || (intensity > 2 && step === 6))) noise(at, 0.12, 0.025, 1350);
+    }
+    const bassHz = root / (step % 4 === 2 ? 2 : 1);
+    tone(bassHz, at, STEP * 0.9, 0.075 + intensity * 0.008, "sawtooth", boss ? 420 : 330);
+    if ((step === 3 || step === 7) && intensity >= 1) {
+      const note = MOTIF[(bar + step) % MOTIF.length];
+      tone(164.81 * Math.pow(2, note / 12), at, STEP * 0.5, boss ? 0.045 : 0.026, "triangle", 2400, step === 3 ? -0.15 : 0.15);
+    }
+    return;
+  }
 
   if (step % 2 === 0) {
     const velocity = [0.98, 0.45, 0.82, 0.48][beat];
@@ -171,9 +189,9 @@ function clearTrack() {
   noiseBuffer = null;
 }
 
-export function start(audioContext, output) {
+export function start(audioContext, output, mode = "menu") {
   if (!audioContext || !output) return;
-  if (playing && context === audioContext) {
+  if (playing && context === audioContext && gameMode === (mode === "game")) {
     master.gain.cancelScheduledValues(context.currentTime);
     master.gain.setTargetAtTime(volume * 0.34, context.currentTime, 0.32);
     return;
@@ -182,6 +200,8 @@ export function start(audioContext, output) {
   teardownTimer = 0;
   clearTrack();
   context = audioContext;
+  gameMode = mode === "game";
+  gameTime = 0;
   destination = output;
   compressor = context.createDynamicsCompressor();
   compressor.threshold.value = -20;
@@ -200,8 +220,11 @@ export function start(audioContext, output) {
   buildPad();
   schedule();
   scheduler = window.setInterval(schedule, SCHEDULE_EVERY_MS);
-  master.gain.setTargetAtTime(volume * 0.34, context.currentTime + 0.02, 0.5);
+  master.gain.setValueAtTime(0.0001, context.currentTime + 0.02);
+  master.gain.linearRampToValueAtTime(volume * 0.34, context.currentTime + (gameMode ? 1.5 : 0.5));
 }
+
+export function setGameplayTime(seconds) { gameTime = Math.max(0, seconds); }
 
 export function stop() {
   if (!playing || !master || !context) return;
