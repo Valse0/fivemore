@@ -181,8 +181,6 @@ function render() {
       context.rotate(quantizeDirection(player.shotAngle));
       context.fillStyle = "#f6ce67";
       context.beginPath(); context.moveTo(0, 0); context.lineTo(14, -4); context.lineTo(10, 0); context.lineTo(14, 4); context.closePath(); context.fill();
-      context.fillStyle = "#fff4c7";
-      context.beginPath(); context.moveTo(1, 0); context.lineTo(10, -1); context.lineTo(7, 0); context.lineTo(10, 1); context.closePath(); context.fill();
       }
       context.restore(); context.globalAlpha = 1; context.globalCompositeOperation = "source-over";
     }
