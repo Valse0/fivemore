@@ -1,50 +1,58 @@
-# FIVEMORE setup report
+# Menu fix report
 
-## Completed
+## Summary
 
-- Installed `frontend-design` and `game-engine` in `skills/`, with aliases under
-  `.agents/skills/`.
-- Extracted the Kenney Top-down Shooter pack to `assets/graphs/kenney/`, kept
-  `License.txt`, removed the source ZIP, and documented available assets in
-  `assets/SPRITES.md`. The pack has no standalone bullet sprite.
-- Recorded run length, waves, boss, continuation, XP/cards, enemies, and gold
-  progression in `docs/GAME_DESIGN.md`; `AGENTS.md` links to the design doc and
-  both skills.
-- Built a portrait main menu with Play, Settings, and Credits. Play opens a
-  “Game coming soon” screen. Settings save music and sound-effect volume and a
-  mute toggle to `localStorage`. Audio context initialization waits for a user
-  tap. The CC0 music slot is empty; no music was added.
+Removed the Credits button and Credits screen. The main menu now contains Play and Settings. The README contains the single requested art attribution line: “Art: Kenney.nl, CC0”. No Kenney name is shown as game UI text.
 
-## Design and game skill use
+## Changed files
 
-- Frontend design guided the field-survival look, mobile layout, touch targets,
-  and visual hierarchy.
-- Game-engine guidance informed the browser audio setup and user-gesture gate.
-- The game-engine skill is available for later gameplay work; no gameplay code
-  was added in this task.
+- `index.html` — removed the Credits menu button and screen.
+- `styles.css` — removed styles used only by the Credits screen and adjusted the shared button selector.
+- `README.md` — replaced the detailed attribution with the requested one-line attribution.
+- `CHANGELOG.md` — recorded this task.
+- `reports/2026-11-13-menu-fix.md` — this report.
+- `report.md` — root copy of this report.
 
-## Run locally
+## Commands run (with results)
 
-From the project root, run:
+- `cat docs/GAME_DESIGN.md` — succeeded; reviewed current game rules.
+- `cat .agents/skills/frontend-design/SKILL.md` and `cat .agents/skills/game-engine/SKILL.md` — succeeded; reviewed applicable design and game guidance.
+- `rg -n -i 'credit|kenney' . --glob '!assets/**'` — succeeded; located the menu credit UI, README attribution, sprite paths, and existing documentation mentions.
+- `git status --short && git log -1 --oneline` — succeeded; worktree was clean before edits, latest commit was `6b41b7e docs: add project completion report`.
+- `git diff --check` — succeeded with no whitespace errors.
+- `rg -n 'Credits|data-screen="credits"|id="credits"' index.html src styles.css` — returned exit code 1 with no matches, confirming the UI has no Credits labels or screen references.
+- `rg -n 'Art: Kenney\.nl, CC0' README.md` — succeeded; found the requested attribution on line 9.
+- `cmp -s report.md reports/2026-11-13-menu-fix.md` — succeeded; the two report copies match.
+- `git diff --stat` — succeeded; showed the source and documentation edits before the report files were staged.
+- `git status --short` — succeeded; listed the expected modified files and new `reports/` report.
+- `git commit -m "fix: remove credits from main menu"` — first attempt failed because Git author identity was unset. Inspected the latest commit, which uses `Codex <codex@openai.com>`, then configured that identity locally for this repository and committed successfully.
 
-```bash
-python3 -m http.server 8000
+## Problems and errors (paste exact error text and what you tried)
+
+The UI `rg` search returned exit code 1 because it found no matches; this was the expected verification result. The first commit attempt failed with this exact text:
+
+```
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+ to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'alisaimdemir02@cs-1999832866-default.(none)')
 ```
 
-Open `http://localhost:8000` in a browser.
+I checked the latest commit identity and used it with repository-local Git configuration; no global configuration was changed. The commit then succeeded.
 
-## Phone checks
+## How to test on iPhone
 
-On iPhone 11 Safari (390 × 844 logical pixels), check that the menu fits in
-portrait without horizontal scrolling, safe areas are respected, sprites load,
-and every button is easy to tap. Change and save audio settings, reload to
-confirm they persist, and confirm no audio starts before the first tap. Play
-should show the placeholder screen.
+Open the project on an iPhone 11 in Safari at 390 × 844 logical pixels. Confirm the home menu shows only Play and Settings, both buttons fit and are easy to tap, Settings still opens, and Play still opens the placeholder screen. Search the visible screens and confirm there is no Kenney text. No physical iPhone test was run for this report.
 
-No phone test was run for this report.
+## Suggested next step
 
-## Phase commits
-
-- Setup: `cb44d89` — `chore: install design and game skills and sprites`
-- Game design: `6fb1aa7` — `docs: define FIVEMORE run and progression design`
-- Main menu: `59a560a` — `feat: add FIVEMORE portrait main menu`
+Implement the first playable run loop behind Play.

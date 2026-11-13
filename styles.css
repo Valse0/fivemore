@@ -116,7 +116,7 @@ h1 {
 .scene-coordinate { position: absolute; right: 25px; bottom: 13px; color: #a4ad9b; font-size: 9px; }
 
 .menu-actions { display: grid; gap: 10px; }
-.menu-button, .back-button, .credit-link {
+.menu-button, .back-button {
   min-height: 54px;
   border: 1px solid #65715f;
   background: transparent;
@@ -173,13 +173,7 @@ input[type="checkbox"][role="switch"]:checked { border-color: var(--signal); bac
 input[type="checkbox"][role="switch"]:checked::before { transform: translateX(24px); background: var(--signal); }
 .screen-note { max-width: 32ch; margin: 23px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
 
-.credit-entry { display: flex; align-items: center; gap: 19px; margin-top: 32px; padding-block: 22px; border-block: 1px solid var(--line); }
-.credit-entry img, .coming-zombie { object-fit: contain; image-rendering: pixelated; }
-.credit-entry p { margin: 0; color: #d1d2c7; font-size: 14px; line-height: 1.7; }
-.credit-entry strong { color: var(--ink); }
-.credit-entry span { color: var(--moss); font-size: 12px; }
-.credit-link { display: inline-grid; place-items: center; align-self: flex-start; min-width: 165px; margin-top: 22px; padding-inline: 17px; }
-.coming-zombie { align-self: center; margin-top: 28px; }
+.coming-zombie { align-self: center; margin-top: 28px; object-fit: contain; image-rendering: pixelated; }
 
 .site-footer { min-height: 36px; margin-top: auto; padding-top: 14px; color: #7f887c; font-size: 9px; letter-spacing: .06em; }
 

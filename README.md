@@ -6,5 +6,5 @@ A vertical zombie survivors-like for mobile browsers. Move with one finger, weap
 
 	•	Platform: HTML5 (itch.io), portrait, touch first
 	•	Status: in development
-	•	Art: Kenney Top-down Shooter (CC0) — https://www.kenney.nl/assets/top-down-shooter
+	•	Art: Kenney.nl, CC0
 	•	Rules for AI agents: see AGENTS.md
