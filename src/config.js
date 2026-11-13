@@ -4,9 +4,15 @@ export const WORLD_SCALE = Number.isFinite(requestedScale) && requestedScale > 0
   : 0.7;
 export const AIM_ASSIST_DEG = 6;
 export const MAX_PARTICLES = 300;
+let outputPixelRatio = 1;
+
+export function setOutputPixelRatio(value) {
+  outputPixelRatio = Math.max(1, Number(value) || 1);
+}
 
 export function snapWorldPixel(value) {
-  return Math.round(value * WORLD_SCALE) / WORLD_SCALE;
+  const outputScale = WORLD_SCALE * outputPixelRatio;
+  return Math.round(value * outputScale) / outputScale;
 }
 
 export function applyWorldTransform(ctx, pixelRatio, width, height, cameraX, cameraY) {
@@ -21,7 +27,8 @@ export function applyWorldTransform(ctx, pixelRatio, width, height, cameraX, cam
 }
 
 export function snapWorldSize(value) {
-  return Math.max(1, Math.round(value * WORLD_SCALE)) / WORLD_SCALE;
+  const outputScale = WORLD_SCALE * outputPixelRatio;
+  return Math.max(1, Math.round(value * outputScale)) / outputScale;
 }
 
 export function quantizeDirection(angle) {

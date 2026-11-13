@@ -4,7 +4,7 @@ import { drawEnemies, getEnemyCount, getKillCount, forNearby, resetEnemies, upda
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
-import { applyWorldTransform, quantizeDirection, snapWorldPixel, snapWorldSize, WORLD_SCALE } from "./config.js";
+import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE } from "./config.js";
 import { drawParticles, updateParticles } from "./particles.js";
 import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
 import { updateGameplayMusicTime, stopGameplayMusic } from "./audio.js";
@@ -57,7 +57,8 @@ function takeContactDamage(enemy) {
 function resize() {
   const rect = canvas.getBoundingClientRect();
   width = rect.width; height = rect.height;
-  pixelRatio = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+  pixelRatio = Math.max(1, window.devicePixelRatio || 1);
+  setOutputPixelRatio(pixelRatio);
   canvas.width = Math.round(width * pixelRatio); canvas.height = Math.round(height * pixelRatio);
   context.imageSmoothingEnabled = false;
 }

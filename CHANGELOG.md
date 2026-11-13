@@ -1,4 +1,5 @@
 # Changelog
+- 2026-11-13 17:27 UTC: Preserved fractional device-pixel ratios and snapped rendered positions to physical output pixels.
 - 2026-11-13 17:24 UTC: Made ground tiles mostly grass with deterministic, clustered dirt patches.
 - 2026-11-13 17:22 UTC: Reused the same snapped camera coordinates for world rendering and ground tile coverage.
 - 2026-11-13 17:20 UTC: Unified gameplay rendering in a snapped world-space camera transform and aligned bullets with the weapon muzzle.
