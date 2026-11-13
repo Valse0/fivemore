@@ -54,3 +54,33 @@ src/
 - Keep a short changelog in CHANGELOG.md (date + one line).
 - If a request is unclear, ask one short question before coding.
 - Missing variants: derive from existing sprites via tint/scale/flip. Never draw new art.
+
+## Verification (mandatory)
+- Never write "done" without proof. Run the game in a headless browser
+  (Playwright, 390x844) and take a screenshot after every task.
+- Check: map fills the whole screen, no console errors,
+  audioContext.state === "running" after the first tap.
+- If you cannot verify something, say "UNVERIFIED" in the report. Do not hide it.
+- Report the real command output, not a summary.
+
+## Reports and changelog
+- Every report starts with: start time, end time, total duration (local time).
+- CHANGELOG.md entries: date + time + one line.
+- Report sections: Changed files, Verified (with screenshot path), Unverified, Problems.
+
+## Bugs first
+- If a known bug exists in the report, fix it before any new feature.
+- Never ship a new feature on top of a broken render or missing audio.
+
+## Camera and scale
+- WORLD_SCALE is in config.js. Phone default is below 1 (start 0.7)
+  so the player sees zombies coming from far away.
+- Support ?scale=0.6 debug param to test values quickly.
+- World background, culling and spawn ring must always be computed from
+  the current scale and screen size, never hardcoded.
+
+## Rendering quality
+- ctx.imageSmoothingEnabled = false. Draw sprites at integer scales.
+- Avoid rotating sprites by arbitrary angles. Use the sprite's native
+  facing or 8 direction frames.
+- Ground: tile the existing Kenney tiles with variation. No flat color fills.
