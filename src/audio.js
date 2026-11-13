@@ -1,4 +1,4 @@
-import { startMenuMusic } from "./music.js";
+import { setVolume as setMusicVolume, start as startMenuMusic, stop as stopMenuMusic } from "./music.js";
 
 const STORAGE_KEY = "fivemore-audio-settings";
 
@@ -8,6 +8,8 @@ let context = null;
 let musicBus = null;
 let effectsBus = null;
 let silentAudio = null;
+let audioUnlocked = false;
+let menuMusicActive = true;
 
 function readSettings() {
   try {
@@ -30,7 +32,12 @@ function clampVolume(value, fallback) {
 function applyGains() {
   if (!musicBus || !effectsBus) return;
   const muteScale = settings.muted ? 0 : 1;
-  musicBus.gain.value = (settings.music / 100) * muteScale;
+  const now = context.currentTime;
+  const target = (settings.music / 100) * muteScale;
+  musicBus.gain.cancelScheduledValues(now);
+  musicBus.gain.setValueAtTime(musicBus.gain.value, now);
+  musicBus.gain.linearRampToValueAtTime(target, now + (settings.muted || settings.music === 0 ? 0.5 : 1.5));
+  setMusicVolume(1);
   effectsBus.gain.value = (settings.effects / 100) * muteScale;
 }
 
@@ -94,7 +101,17 @@ export async function startAudioFromGesture() {
       return;
     }
   }
-  if (audioContext.state === "running") startMenuMusic(audioContext, musicBus);
+  if (audioContext.state === "running") {
+    audioUnlocked = true;
+    if (menuMusicActive) startMenuMusic(audioContext, musicBus);
+  }
+}
+
+export function setMenuMusicActive(active) {
+  menuMusicActive = Boolean(active);
+  if (!audioUnlocked) return;
+  if (menuMusicActive && context?.state === "running") startMenuMusic(context, musicBus);
+  else stopMenuMusic();
 }
 
 export async function playTestSound() {

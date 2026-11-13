@@ -10,3 +10,4 @@
 - 2026-11-13: Fixed iPhone Safari menu audio startup, added a settings test tone and opt-in audio status.
 - 2026-11-13: Repositioned the Support back button and refined crisp menu sprite and coordinate placement.
 - 2026-11-13: Tightened main-menu vertical spacing for standard and short phone screens.
+- 2026-11-13: Replaced the short menu melody with a layered, fade-controlled procedural survival theme.

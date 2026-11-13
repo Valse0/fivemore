@@ -1,4 +1,4 @@
-import { getAudioDebugStatus, getAudioSettings, playTestSound, setAudioSetting, startAudioFromGesture } from "./audio.js";
+import { getAudioDebugStatus, getAudioSettings, playTestSound, setAudioSetting, setMenuMusicActive, startAudioFromGesture } from "./audio.js";
 import { SUPPORT_LINKS } from "./links.js";
 import { createHeartButton } from "./support.js";
 
@@ -16,6 +16,7 @@ function showScreen(screenId) {
   if (!nextScreen) return;
 
   for (const screen of screens) screen.hidden = screen !== nextScreen;
+  setMenuMusicActive(screenId !== "game");
   const heading = nextScreen.querySelector("h1");
   if (heading) {
     heading.setAttribute("tabindex", "-1");
