@@ -1,5 +1,6 @@
 const BPM = 104;
 const BEAT = 60 / BPM;
+const BAR = BEAT * 4;
 const STEP = BEAT / 2;
 const STEPS_PER_BAR = 8;
 const BARS = 28; // 64.62 seconds at 104 BPM
