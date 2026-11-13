@@ -8,6 +8,7 @@ FIVEMORE is a vertical (portrait) survivors-like zombie game for the web (itch.i
 - Kill zombies -> they drop XP gems -> collect gems -> level up -> pick 1 of 3 upgrade cards.
 - One run lasts 5 minutes. A boss appears at the end. Dying or winning gives gold for permanent upgrades.
 - Hook (draft, may change): cards transform the player's single main weapon instead of adding many weapons.
+- Raporlardaki tüm saatler Peru saati (America/Lima, UTC-5) ile yazılsın ve yanında 'Peru' yazsın.
 
 Game decisions are tracked in [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md). Read it before changing game rules.
 
