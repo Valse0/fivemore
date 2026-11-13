@@ -1,5 +1,6 @@
 import { damageEnemy, forNearby, getEnemies } from "./enemies.js";
-import { AIM_ASSIST_DEG, quantizeDirection, snapWorldPixel, snapWorldSize } from "./config.js";
+import { AIM_ASSIST_DEG, quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS } from "./config.js";
+import { sprites, drawFrame, frameCount } from "./assets.js";
 import { spawnParticles } from "./particles.js";
 import { pistolShot, bulletHit, zombieDeath } from "./sfx.js";
 
@@ -12,6 +13,7 @@ let candidate = null;
 let candidateDistance = Infinity;
 let bulletX = 0; let bulletY = 0; let hitIndex = -1;
 let aimAngle = 0;
+let visualTime = 0;
 
 function selectNearest(enemy, index) {
   if (!enemy.active) return;
@@ -51,6 +53,7 @@ function fire(player) {
 }
 
 export function updateWeapons(player, dt) {
+  visualTime += dt;
   player.firing = Math.max(0, player.firing - dt); player.recoil = Math.max(0, player.recoil - dt);
   fireClock -= dt;
   if (fireClock <= 0) { fire(player); fireClock += 0.5; }
@@ -75,8 +78,16 @@ export function drawBullets(ctx, player, width, height) {
   for (let i = 0; i < MAX_BULLETS; i += 1) {
     const b = bullets[i]; if (!b.active) continue;
     const x = snapWorldPixel(b.x); const y = snapWorldPixel(b.y);
-    const bulletWidth = snapWorldSize(4); const bulletHeight = snapWorldSize(10);
-    ctx.save(); ctx.translate(x, y); ctx.rotate(quantizeDirection(Math.atan2(b.vy, b.vx))); ctx.fillStyle = "#f6ce67"; ctx.fillRect(-bulletWidth / 2, -bulletHeight / 2, bulletWidth, bulletHeight); ctx.fillStyle = "#fff4c7"; ctx.fillRect(-snapWorldSize(1), -snapWorldSize(4), snapWorldSize(2), snapWorldSize(7)); ctx.restore();
+    ctx.save(); ctx.translate(x, y); ctx.rotate(quantizeDirection(Math.atan2(b.vy, b.vx)));
+    if (USE_V2_ASSETS) {
+      const size = snapWorldSize(DRAW_SIZES.bullet);
+      drawFrame(ctx, sprites.bullet, Math.floor(visualTime * 18) % frameCount(sprites.bullet), -size/2, -size/2, size, size, 32);
+    } else {
+      const bulletWidth=snapWorldSize(4); const bulletHeight=snapWorldSize(10);
+      ctx.fillStyle="#f6ce67"; ctx.fillRect(-bulletWidth/2,-bulletHeight/2,bulletWidth,bulletHeight);
+      ctx.fillStyle="#fff4c7"; ctx.fillRect(-snapWorldSize(1),-snapWorldSize(4),snapWorldSize(2),snapWorldSize(7));
+    }
+    ctx.restore();
   }
 }
 

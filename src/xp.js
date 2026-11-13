@@ -1,6 +1,7 @@
 import { spawnParticles } from "./particles.js";
 import { xpPickup, levelUp } from "./sfx.js";
-import { snapWorldPixel, snapWorldSize } from "./config.js";
+import { snapWorldPixel, snapWorldSize, USE_V2_ASSETS } from "./config.js";
+import { sprites, drawFrame, frameCount } from "./assets.js";
 
 const MAX_GEMS = 150;
 const gems = Array.from({ length: MAX_GEMS }, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, age: 0, value: 1, color: 0, scale: 1 }));
@@ -67,6 +68,9 @@ export function drawGems(ctx, player, width, height) {
     const gemSize = snapWorldSize(size);
     const glowSize = snapWorldSize(size * 2);
     ctx.globalAlpha = 0.55; ctx.drawImage(gemAtlas, gem.color * 32, 0, 32, 32, snapWorldPixel(x - size), snapWorldPixel(y - size + bob), glowSize, glowSize);
-    ctx.globalAlpha = 1; ctx.drawImage(gemAtlas, gem.color * 32, 0, 32, 32, snapWorldPixel(x - size / 2), snapWorldPixel(y - size / 2 + bob), gemSize, gemSize);
+    ctx.globalAlpha = 1;
+    const frame = gem.color * 2 + Math.floor(gem.age * 8) % 2;
+    if (!USE_V2_ASSETS || !drawFrame(ctx, sprites.gem, frame % frameCount(sprites.gem), snapWorldPixel(x - size/2), snapWorldPixel(y - size/2 + bob), gemSize, gemSize))
+      ctx.drawImage(gemAtlas, gem.color * 32, 0, 32, 32, snapWorldPixel(x - size/2), snapWorldPixel(y - size/2 + bob), gemSize, gemSize);
   }
 }

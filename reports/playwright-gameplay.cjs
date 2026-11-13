@@ -32,6 +32,10 @@ const server = http.createServer((req, res) => {
     };
     const originalDrawImage = CanvasRenderingContext2D.prototype.drawImage;
     CanvasRenderingContext2D.prototype.drawImage = function(source, ...args) {
+      if (this.canvas?.id === 'game-canvas' && source instanceof HTMLImageElement && source.src.includes('/assets/v2/effects/bullet_spritesheet.png') && args.length === 8 && window.__bulletDraws.length < 20) {
+        const t = this.getTransform(); const x = args[4] + args[6] / 2; const y = args[5] + args[7] / 2;
+        window.__bulletDraws.push({ x: t.a*x + t.c*y + t.e, y: t.b*x + t.d*y + t.f, angle: Math.atan2(t.b,t.a) });
+      }
       if (this.canvas?.id === 'game-canvas' && source instanceof HTMLCanvasElement && source.width === 96 && source.height === 32 && args.length === 8) {
         const t = this.getTransform(); const x = args[4] + args[6] / 2; const y = args[5] + args[7] / 2;
         window.__gemDraws.push({ x: t.a*x + t.c*y + t.e, y: t.b*x + t.d*y + t.f });

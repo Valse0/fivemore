@@ -166,14 +166,20 @@ function render() {
     context.restore(); context.globalAlpha = 1;
     if (player.firing > 0) {
       context.save();
-      context.translate(snapWorldPixel(player.x + Math.cos(player.shotAngle) * 40), snapWorldPixel(player.y + Math.sin(player.shotAngle) * 40));
-      context.rotate(quantizeDirection(player.shotAngle));
       context.globalCompositeOperation = "lighter";
       context.globalAlpha = Math.min(1, player.firing / 0.08);
+      if (USE_V2_ASSETS && sprites.muzzle.complete && sprites.muzzle.naturalWidth) {
+        const size = snapWorldSize(DRAW_SIZES.muzzle); context.translate(snapWorldPixel(player.x + Math.cos(player.shotAngle) * 40), snapWorldPixel(player.y + Math.sin(player.shotAngle) * 40));
+        context.rotate(quantizeDirection(player.shotAngle));
+        drawFrame(context, sprites.muzzle, Math.floor(visualTime * 30) % frameCount(sprites.muzzle), -size/2, -size/2, size, size); context.restore();
+      } else {
+      context.translate(snapWorldPixel(player.x + Math.cos(player.shotAngle) * 40), snapWorldPixel(player.y + Math.sin(player.shotAngle) * 40));
+      context.rotate(quantizeDirection(player.shotAngle));
       context.fillStyle = "#f6ce67";
       context.beginPath(); context.moveTo(0, 0); context.lineTo(14, -4); context.lineTo(10, 0); context.lineTo(14, 4); context.closePath(); context.fill();
       context.fillStyle = "#fff4c7";
       context.beginPath(); context.moveTo(1, 0); context.lineTo(10, -1); context.lineTo(7, 0); context.lineTo(10, 1); context.closePath(); context.fill();
+      }
       context.restore(); context.globalAlpha = 1; context.globalCompositeOperation = "source-over";
     }
   }

@@ -1,4 +1,5 @@
-import { MAX_PARTICLES, snapWorldPixel, snapWorldSize } from "./config.js";
+import { MAX_PARTICLES, snapWorldPixel, snapWorldSize, USE_V2_ASSETS } from "./config.js";
+import { sprites, drawFrame, frameCount } from "./assets.js";
 
 const particles = Array.from({ length: MAX_PARTICLES }, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0, maxLife: 0, size: 1, color: "#fff" }));
 const atlas = document.createElement("canvas");
@@ -36,6 +37,8 @@ export function drawParticles(ctx, player, width, height) {
     const p = particles[i]; if (!p.active) continue;
     ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
     const size = snapWorldSize(p.size);
+    if (USE_V2_ASSETS && p.color === "#fff4c7" && drawFrame(ctx, sprites.spark, Math.floor((p.maxLife-p.life)*24) % frameCount(sprites.spark),
+      snapWorldPixel(p.x-p.size/2), snapWorldPixel(p.y-p.size/2), size, size, 32)) continue;
     ctx.drawImage(atlas, p.color === "#fff4c7" ? 0 : p.color === "#8e3c39" ? 48 : 32, 0, 16, 16,
       snapWorldPixel(p.x - p.size / 2), snapWorldPixel(p.y - p.size / 2), size, size);
   }
