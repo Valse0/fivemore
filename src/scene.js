@@ -11,6 +11,7 @@ import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
 import { updateGameplayMusicTime, stopGameplayMusic } from "./audio.js";
 
 const TILE_SIZE = 64;
+const V2_TILE_SIZE = 32;
 const STEP = 1 / 60;
 const MAX_FRAME = 0.25;
 const movement = { x: 0, y: 0 };
@@ -47,6 +48,7 @@ const debugFps = new URLSearchParams(location.search).get("debug") === "1";
 const fpsElement = document.querySelector("#fps-counter");
 let hitEnemy = null;
 let visualTime = 0;
+const worldObjectSprites = [sprites.crate, sprites.barrel, sprites.rock, sprites.tree, sprites.flowers];
 function takeContactDamage(enemy) {
   if (player.invulnerable > 0 || !enemy.active) return;
   const dx = player.x - enemy.x; const dy = player.y - enemy.y;
@@ -105,11 +107,11 @@ function render() {
   const viewWidth = width / WORLD_SCALE; const viewHeight = height / WORLD_SCALE;
   if (USE_V2_ASSETS && sprites.grass.complete && sprites.grass.naturalWidth) {
     const cameraLeft = cameraX - viewWidth / 2; const cameraTop = cameraY - viewHeight / 2;
-    const firstTileX = Math.floor(cameraLeft / TILE_SIZE); const firstTileY = Math.floor(cameraTop / TILE_SIZE);
-    const lastTileX = Math.ceil((cameraLeft + viewWidth) / TILE_SIZE); const lastTileY = Math.ceil((cameraTop + viewHeight) / TILE_SIZE);
+    const firstTileX = Math.floor(cameraLeft / V2_TILE_SIZE); const firstTileY = Math.floor(cameraTop / V2_TILE_SIZE);
+    const lastTileX = Math.ceil((cameraLeft + viewWidth) / V2_TILE_SIZE); const lastTileY = Math.ceil((cameraTop + viewHeight) / V2_TILE_SIZE);
     for (let ty = firstTileY; ty <= lastTileY; ty += 1) for (let tx = firstTileX; tx <= lastTileX; tx += 1) {
       const variant = ((tx * 73856093 ^ ty * 19349663) >>> 0) % frameCount(sprites.grass); const sz = snapWorldSize(DRAW_SIZES.tile);
-      drawFrame(context, sprites.grass, variant, snapWorldPixel(tx*TILE_SIZE), snapWorldPixel(ty*TILE_SIZE), sz, sz);
+      drawFrame(context, sprites.grass, variant, snapWorldPixel(tx*V2_TILE_SIZE), snapWorldPixel(ty*V2_TILE_SIZE), sz, sz);
     }
   } else if (groundImages[0].complete && groundImages[0].naturalWidth) {
     const cameraLeft = cameraX - viewWidth / 2; const cameraTop = cameraY - viewHeight / 2;
@@ -134,7 +136,7 @@ function render() {
     const top = Math.floor((cameraY-viewHeight/2)/192); const bottom = Math.ceil((cameraY+viewHeight/2)/192);
     for (let gy=top; gy<=bottom; gy+=1) for (let gx=left; gx<=right; gx+=1) {
       const h=(gx*73856093 ^ gy*19349663)>>>0; if (h%7!==0) continue;
-      const choices=[sprites.crate,sprites.barrel,sprites.rock,sprites.tree,sprites.flowers]; const sprite=choices[(h>>>4)%choices.length];
+      const sprite=worldObjectSprites[(h>>>4)%worldObjectSprites.length];
       const frame=(h>>>8)%frameCount(sprite); const base=Number(sprite.dataset.frameSize); const size=snapWorldSize(base);
       drawFrame(context,sprite,frame,snapWorldPixel(gx*192+96-size/2),snapWorldPixel(gy*192+96-size/2),size,size,base);
     }
