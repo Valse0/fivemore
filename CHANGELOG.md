@@ -1,3 +1,5 @@
+- 2026-11-13 17:18 Peru: Added configured Tank, Spitter and minute-five Boss spawning, ranged spit attacks and enemy debug controls.
+- 2026-11-13 17:01 Peru: Removed the stuck hurt pose and added configured red hit tint and collision-safe recoil.
 - 2026-11-13 16:32 Peru: Documented the separate Agent Sprite Forge installation, asset test, API checks, and local credential setup.
 # Changelog
 - 2026-11-13 20:22 UTC: Increased survivor draw size from 64 to 76 world units without changing collision radius.

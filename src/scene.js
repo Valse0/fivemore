@@ -1,10 +1,10 @@
 import { initializeInput, readMovement, showInput } from "./input.js";
-import { player, updatePlayer } from "./player.js";
-import { drawEnemies, getEnemyCount, getKillCount, forNearby, resetEnemies, updateEnemies, updateCorpses } from "./enemies.js";
+import { player, updatePlayer, damagePlayerFrom } from "./player.js";
+import { drawEnemies, drawSpits, getEnemyCount, getKillCount, getEnemies, getEnemyCountsByType, getSpitCount, debugSpawnEnemy, hasBossSpawned, isBossAlive, forNearby, resetEnemies, updateEnemies, updateCorpses } from "./enemies.js";
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
-import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS } from "./config.js";
+import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { drawParticles, updateParticles } from "./particles.js";
 import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
@@ -18,6 +18,7 @@ const movement = { x: 0, y: 0 };
 const canvas = document.querySelector("#game-canvas");
 const context = canvas.getContext("2d", { alpha: false });
 const playerImage = new Image();
+let hurtSprite = null;
 const standImage = new Image();
 const runnerImage = new Image();
 const groundImages = Array.from({ length: 6 }, (_, index) => {
@@ -26,6 +27,22 @@ const groundImages = Array.from({ length: 6 }, (_, index) => {
   return image;
 });
 playerImage.src = "assets/graphs/kenney/PNG/Survivor%201/survivor1_gun.png";
+function createHurtSprite() {
+  if (hurtSprite || !sprites.survivor.complete || !sprites.survivor.naturalWidth) return;
+  hurtSprite = document.createElement("canvas");
+  hurtSprite.width = sprites.survivor.naturalWidth;
+  hurtSprite.height = sprites.survivor.naturalHeight;
+  hurtSprite.dataset.frameSize = sprites.survivor.dataset.frameSize;
+  const tintContext = hurtSprite.getContext("2d");
+  tintContext.drawImage(sprites.survivor, 0, 0);
+  tintContext.globalCompositeOperation = "source-atop";
+  tintContext.globalAlpha = PLAYER_HURT_TINT_ALPHA;
+  tintContext.fillStyle = "#ff263b";
+  tintContext.fillRect(0, 0, hurtSprite.width, hurtSprite.height);
+  tintContext.globalAlpha = 1;
+}
+sprites.survivor.addEventListener("load", createHurtSprite);
+createHurtSprite();
 standImage.src = "assets/graphs/kenney/PNG/Survivor%201/survivor1_stand.png";
 runnerImage.src = "assets/graphs/kenney/PNG/Zombie%201/zoimbie1_stand.png";
 let tintedRunner = null;
@@ -50,13 +67,17 @@ const fpsElement = document.querySelector("#fps-counter");
 let hitEnemy = null;
 let visualTime = 0;
 const worldObjectSprites = [sprites.crate, sprites.barrel, sprites.rock, sprites.tree, sprites.flowers];
+function takePlayerDamage(amount, source) {
+  if (player.invulnerable > 0) return false;
+  player.hp = Math.max(0, player.hp - amount); player.invulnerable = 0.5; damagePlayerFrom(source); playerHurt();
+  return true;
+}
+
 function takeContactDamage(enemy) {
-  if (player.invulnerable > 0 || !enemy.active) return;
+  if (!enemy.active) return;
   const dx = player.x - enemy.x; const dy = player.y - enemy.y;
   const radius = enemy.radius + 18;
-  if (dx * dx + dy * dy <= radius * radius) {
-    player.hp = Math.max(0, player.hp - 12); player.invulnerable = 0.5; playerHurt();
-  }
+  if (dx * dx + dy * dy <= radius * radius) takePlayerDamage(enemy.damage, enemy);
 }
 
 function resize() {
@@ -69,7 +90,7 @@ function resize() {
 }
 
 function resetRun() {
-  player.x = 0; player.y = 0; player.angle = -Math.PI / 2; player.hp = 100; player.invulnerable = 0;
+  player.x = 0; player.y = 0; player.angle = -Math.PI / 2; player.hp = 100; player.invulnerable = 0; player.hurtTimer = 0;
   levelFlash = 0; levelWave = 1;
   deathVisualTime = 0;
   ambientClock = 0;
@@ -88,16 +109,16 @@ function update(dt) {
   player.invulnerable = Math.max(0, player.invulnerable - dt);
   readMovement(movement);
   updatePlayer(movement, dt);
-  updateEnemies(player, dt, runTime, width / WORLD_SCALE, height / WORLD_SCALE);
+  updateEnemies(player, dt, runTime, width / WORLD_SCALE, height / WORLD_SCALE, takePlayerDamage);
   updateCorpses(dt);
   forNearby(player.x, player.y, takeContactDamage);
   updateWeapons(player, dt);
   updateParticles(dt);
   if (updateXP(player, dt)) { player.hp = Math.min(100, player.hp + 10); levelFlash = 0.16; levelWave = 0; }
   updateHUD(runTime, player.hp);
-  if (player.hp <= 0 || runTime >= 300) {
+  if (player.hp <= 0 || (runTime >= 300 && hasBossSpawned() && !isBossAlive())) {
     ended = true;
-    showRunEnd(runTime >= 300, runTime, getKillCount());
+    showRunEnd(runTime >= 300 && player.hp > 0, runTime, getKillCount());
     active = false; showInput(false);
     stopGameplayMusic(); gameOver();
   }
@@ -145,6 +166,7 @@ function render() {
   }
   drawGems(context, player, viewWidth, viewHeight, null);
   drawEnemies(context, runnerImage, player, viewWidth, viewHeight, tintedRunner);
+  drawSpits(context, player, viewWidth, viewHeight);
   drawBullets(context, player, viewWidth, viewHeight);
   drawParticles(context, player, viewWidth, viewHeight);
   if (levelWave < 0.65) {
@@ -153,16 +175,16 @@ function render() {
   }
   if (USE_V2_ASSETS) {
     const sprite = sprites.survivor; const size = snapWorldSize(DRAW_SIZES.survivor); const count = frameCount(sprite);
-    const hurtFrame = Math.max(0, count - 2); const walkFrames = Math.max(1, count - 2);
+    const walkFrames = Math.max(1, count - 2);
     if (player.hp > 0 || deathVisualTime < 0.4) {
-      const frame = player.hp <= 0 ? count - 1 : player.invulnerable > 0 ? hurtFrame : Math.floor(visualTime * (movement.x || movement.y ? 9 : 3)) % walkFrames;
-      if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
+      const frame = player.hp <= 0 ? count - 1 : Math.floor(visualTime * (movement.x || movement.y ? 9 : 3)) % walkFrames;
       context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y));
       if (Math.cos(player.angle) < 0) context.scale(-1, 1);
-      drawFrame(context, sprite, frame, -size / 2, -size / 2, size, size); context.restore(); context.globalAlpha = 1;
+      if (player.hurtTimer > 0 && hurtSprite) context.drawImage(hurtSprite, frame * 64, 0, 64, 64, -size / 2, -size / 2, size, size);
+      else drawFrame(context, sprite, frame, -size / 2, -size / 2, size, size);
+      context.restore(); context.globalAlpha = 1;
     }
   } else if (playerImage.complete && playerImage.naturalWidth) {
-    if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
     context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y - Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0)));
     context.rotate(quantizeDirection(player.angle));
     const playerSize = snapWorldSize(64);
@@ -215,6 +237,16 @@ export function initializeGame() {
   initializeInput(canvas, document.querySelector("#virtual-stick"));
   window.addEventListener("resize", resize); resize();
   fpsElement.hidden = !debugFps;
+  if (debugFps) window.__gameDebug = {
+    spawnEnemy: (type, x, y) => debugSpawnEnemy(type, player, x, y),
+    setRunTime: (value) => { runTime = Math.max(0, Number(value) || 0); },
+    getRunTime: () => runTime,
+    reset: () => { resetRun(); },
+    getEnemyCounts: getEnemyCountsByType,
+    getSpitCount,
+    getEnemies,
+    isBossAlive,
+  };
   document.querySelector("#pause-game").addEventListener("click", () => document.querySelector('[data-screen="home"]').click());
   requestAnimationFrame(frame);
 }

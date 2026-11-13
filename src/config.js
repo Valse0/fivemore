@@ -7,6 +7,26 @@ export const WORLD_SCALE = Number.isFinite(requestedScale) && requestedScale > 0
 export const AIM_ASSIST_DEG = 15;
 export const OBSTACLE_RADII = { crate: 18, barrel: 14, rock: 20, tree: 14 };
 export const PLAYER_COLLIDER_RADIUS = 14;
+export const PLAYER_HURT_DURATION = 0.15;
+export const PLAYER_HURT_TINT_ALPHA = 0.45;
+export const PLAYER_HURT_RECOIL_DISTANCE = 6;
+export const BOSS_SPAWN_TIME = 300;
+export const SPITTER_CONFIG = {
+  preferredDistance: 220,
+  attackRange: 270,
+  attackInterval: 1.6,
+  spitSpeed: 190,
+  spitDamage: 8,
+  spitRadius: 8,
+  spitPassesObstacles: false,
+};
+export const ENEMY_CONFIG = {
+  walker: { id: 0, hp: 36, speed: 43, damage: 12, radius: 16, xp: 1, spawnWeight: 3, startTime: 0, scale: 1, attackAnimation: "attack" },
+  runner: { id: 1, hp: 19, speed: 79, damage: 8, radius: 12, xp: 1, spawnWeight: 1, startTime: 60, scale: 0.76, attackAnimation: "attack" },
+  tank: { id: 2, hp: 260, speed: 22, damage: 22, radius: 24, xp: 4, spawnWeight: 1, startTime: 120, scale: 1.15, attackAnimation: "attack" },
+  spitter: { id: 3, hp: 30, speed: 34, damage: 8, radius: 16, xp: 2, spawnWeight: 1, startTime: 60, scale: 1, attackAnimation: "attack" },
+  boss: { id: 4, hp: 2400, speed: 20, damage: 28, radius: 40, xp: 12, spawnWeight: 0, startTime: BOSS_SPAWN_TIME, scale: 1.5, attackAnimation: "attack" },
+};
 export const MAX_PARTICLES = 300;
 let outputPixelRatio = 1;
 

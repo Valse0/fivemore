@@ -29,6 +29,23 @@ function collides(x, y, radius) {
   return false;
 }
 
+export function segmentBlockedByObstacle(x1, y1, x2, y2, radius = 0) {
+  const bounds = 20 + radius;
+  const minX = Math.floor((Math.min(x1, x2) - bounds) / CELL_SIZE);
+  const maxX = Math.floor((Math.max(x1, x2) + bounds) / CELL_SIZE);
+  const minY = Math.floor((Math.min(y1, y2) - bounds) / CELL_SIZE);
+  const maxY = Math.floor((Math.max(y1, y2) + bounds) / CELL_SIZE);
+  const dx = x2 - x1; const dy = y2 - y1; const lengthSq = dx * dx + dy * dy || 1;
+  for (let gy = minY; gy <= maxY; gy += 1) for (let gx = minX; gx <= maxX; gx += 1) {
+    const obstacle = objectInCell(gx, gy);
+    if (!obstacle) continue;
+    const t = Math.max(0, Math.min(1, ((obstacle.x - x1) * dx + (obstacle.y - y1) * dy) / lengthSq));
+    const nearestX = x1 + dx * t; const nearestY = y1 + dy * t;
+    if ((nearestX - obstacle.x) ** 2 + (nearestY - obstacle.y) ** 2 < (obstacle.radius + radius) ** 2) return true;
+  }
+  return false;
+}
+
 export function moveCircle(entity, dx, dy, radius) {
   const nextX = entity.x + dx;
   if (!collides(nextX, entity.y, radius)) entity.x = nextX;

@@ -1,23 +1,37 @@
-import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS } from "./config.js";
+import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS, ENEMY_CONFIG, SPITTER_CONFIG, BOSS_SPAWN_TIME } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
-import { moveCircle } from "./obstacles.js";
+import { moveCircle, segmentBlockedByObstacle } from "./obstacles.js";
 
 export const MAX_ENEMIES = 150;
 const CELL_SIZE = 96;
 const HASH_SIZE = 257;
-const TYPES = {
-  walker: { hp: 36, speed: 43, radius: 16, xp: 1, scale: 1 },
-  runner: { hp: 19, speed: 79, radius: 12, xp: 1, scale: 0.76 },
-};
-const enemies = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, hp: 0, speed: 0, radius: 0, xp: 0, type: 0, angle: 0, next: -1, flash: 0 }));
+const TYPE_NAMES = ["walker", "runner", "tank", "spitter", "boss"];
+const enemies = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, hp: 0, speed: 0, damage: 0, radius: 0, xp: 0, type: 0, angle: 0, next: -1, flash: 0, spitClock: 0 }));
 const corpses = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, angle: 0, type: 0, life: 0, animation: 0 }));
+const MAX_SPITS = 48;
+const spits = Array.from({ length: MAX_SPITS }, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0 }));
 const bucketHeads = new Int16Array(HASH_SIZE);
-const typeIndex = { walker: 0, runner: 1 };
 let spawnClock = 0;
 let spawnOrdinal = 0;
 let activeCount = 0;
 let kills = 0;
 let animationTime = 0;
+let bossSpawned = false;
+let spitDamageCallback = null;
+let spitFrameTime = 0;
+
+function allocateEnemy(typeName, x, y) {
+  let enemy = null;
+  for (let i = 0; i < MAX_ENEMIES; i += 1) if (!enemies[i].active) { enemy = enemies[i]; break; }
+  if (!enemy) return null;
+  const stats = ENEMY_CONFIG[typeName];
+  enemy.active = true; enemy.x = x; enemy.y = y;
+  enemy.hp = stats.hp; enemy.speed = stats.speed; enemy.damage = stats.damage;
+  enemy.radius = stats.radius; enemy.xp = stats.xp; enemy.type = stats.id;
+  enemy.angle = 0; enemy.next = -1; enemy.flash = 0; enemy.spitClock = SPITTER_CONFIG.attackInterval;
+  activeCount += 1;
+  return enemy;
+}
 
 function hash(x, y) {
   const cx = Math.floor(x / CELL_SIZE);
@@ -29,24 +43,63 @@ function hash(x, y) {
 export function resetEnemies() {
   for (let i = 0; i < MAX_ENEMIES; i += 1) enemies[i].active = false;
   for (let i = 0; i < MAX_ENEMIES; i += 1) corpses[i].active = false;
-  spawnClock = 0; spawnOrdinal = 0; activeCount = 0; kills = 0;
+  for (let i = 0; i < MAX_SPITS; i += 1) spits[i].active = false;
+  spawnClock = 0; spawnOrdinal = 0; activeCount = 0; kills = 0; bossSpawned = false; spitFrameTime = 0;
 }
 
-function spawn(player, width, height, time) {
-  let enemy = null;
-  for (let i = 0; i < MAX_ENEMIES; i += 1) if (!enemies[i].active) { enemy = enemies[i]; break; }
-  if (!enemy) return;
+function chooseSpawnType(time) {
+  let totalWeight = 0;
+  for (const stats of Object.values(ENEMY_CONFIG)) if (stats.spawnWeight > 0 && stats.startTime <= time) totalWeight += stats.spawnWeight;
+  let choice = Math.random() * totalWeight;
+  for (const [name, stats] of Object.entries(ENEMY_CONFIG)) {
+    if (stats.spawnWeight <= 0 || stats.startTime > time) continue;
+    choice -= stats.spawnWeight;
+    if (choice < 0) return name;
+  }
+  return "walker";
+}
+
+function spawn(player, width, height, time, typeName = chooseSpawnType(time), position = null) {
   const angle = Math.random() * Math.PI * 2;
-  const distance = Math.hypot(width, height) * 0.58;
-  const type = time >= 60 && spawnOrdinal % 4 === 0 ? 1 : 0;
-  const stats = TYPES[type ? "runner" : "walker"];
-  enemy.active = true;
-  enemy.x = player.x + Math.cos(angle) * distance;
-  enemy.y = player.y + Math.sin(angle) * distance;
-  enemy.hp = stats.hp; enemy.speed = stats.speed; enemy.radius = stats.radius; enemy.xp = stats.xp;
-  enemy.type = type; enemy.angle = 0; enemy.next = -1;
-  enemy.flash = 0;
-  spawnOrdinal += 1; activeCount += 1;
+  const distance = typeName === "boss" ? Math.min(width, height) * 0.3 : Math.hypot(width, height) * 0.58;
+  const enemy = allocateEnemy(typeName, position?.x ?? player.x + Math.cos(angle) * distance, position?.y ?? player.y + Math.sin(angle) * distance);
+  if (!enemy) return null;
+  spawnOrdinal += 1;
+  return enemy;
+}
+
+function fireSpit(enemy, player, dx, dy, distance) {
+  let spit = null;
+  for (let i = 0; i < MAX_SPITS; i += 1) if (!spits[i].active) { spit = spits[i]; break; }
+  if (!spit) return;
+  const angle = Math.atan2(dy, dx); const ux = dx / distance; const uy = dy / distance;
+  spit.active = true;
+  spit.x = enemy.x + ux * (enemy.radius + SPITTER_CONFIG.spitRadius);
+  spit.y = enemy.y + uy * (enemy.radius + SPITTER_CONFIG.spitRadius);
+  spit.vx = ux * SPITTER_CONFIG.spitSpeed; spit.vy = uy * SPITTER_CONFIG.spitSpeed; spit.life = 3;
+}
+
+function pointSegmentDistanceSquared(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1; const dy = y2 - y1; const lengthSq = dx * dx + dy * dy || 1;
+  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lengthSq));
+  const x = x1 + dx * t; const y = y1 + dy * t;
+  return (px - x) ** 2 + (py - y) ** 2;
+}
+
+function updateSpits(player, dt) {
+  for (let i = 0; i < MAX_SPITS; i += 1) {
+    const spit = spits[i]; if (!spit.active) continue;
+    const oldX = spit.x; const oldY = spit.y;
+    const nextX = oldX + spit.vx * dt; const nextY = oldY + spit.vy * dt;
+    spit.life -= dt;
+    if (!SPITTER_CONFIG.spitPassesObstacles && segmentBlockedByObstacle(oldX, oldY, nextX, nextY, SPITTER_CONFIG.spitRadius)) { spit.active = false; continue; }
+    if (pointSegmentDistanceSquared(player.x, player.y, oldX, oldY, nextX, nextY) <= (SPITTER_CONFIG.spitRadius + 14) ** 2) {
+      if (spitDamageCallback) spitDamageCallback(SPITTER_CONFIG.spitDamage, { x: oldX, y: oldY, angle: Math.atan2(-spit.vy, -spit.vx), active: true });
+      spit.active = false; continue;
+    }
+    spit.x = nextX; spit.y = nextY;
+    if (spit.life <= 0) spit.active = false;
+  }
 }
 
 export function rebuildEnemyHash() {
@@ -80,10 +133,11 @@ export function damageEnemy(index, damage) {
   return true;
 }
 
-export function updateEnemies(player, dt, time, width, height) {
-  animationTime += dt;
+export function updateEnemies(player, dt, time, width, height, onPlayerDamage = null) {
+  animationTime += dt; spitFrameTime += dt; spitDamageCallback = onPlayerDamage;
   spawnClock -= dt;
   const interval = Math.max(0.34, 1.18 - Math.floor(time / 30) * 0.09);
+  if (!bossSpawned && time >= BOSS_SPAWN_TIME && activeCount < MAX_ENEMIES) bossSpawned = Boolean(spawn(player, width, height, time, "boss"));
   while (spawnClock <= 0 && activeCount < MAX_ENEMIES) { spawn(player, width, height, time); spawnClock += interval; }
   for (let i = 0; i < MAX_ENEMIES; i += 1) {
     const e = enemies[i];
@@ -92,8 +146,18 @@ export function updateEnemies(player, dt, time, width, height) {
     const dx = player.x - e.x; const dy = player.y - e.y;
     const distance = Math.hypot(dx, dy) || 1;
     e.angle = Math.atan2(dy, dx);
-    moveCircle(e, dx / distance * e.speed * dt, dy / distance * e.speed * dt, e.radius);
+    const typeName = TYPE_NAMES[e.type];
+    if (typeName === "spitter") {
+      e.spitClock -= dt;
+      const offset = distance - SPITTER_CONFIG.preferredDistance;
+      if (Math.abs(offset) > 18) {
+        const direction = offset < 0 ? -1 : 1;
+        moveCircle(e, dx / distance * e.speed * dt * direction, dy / distance * e.speed * dt * direction, e.radius);
+      }
+      if (distance <= SPITTER_CONFIG.attackRange && e.spitClock <= 0) { fireSpit(e, player, dx, dy, distance); e.spitClock = SPITTER_CONFIG.attackInterval; }
+    } else moveCircle(e, dx / distance * e.speed * dt, dy / distance * e.speed * dt, e.radius);
   }
+  updateSpits(player, dt);
   rebuildEnemyHash();
 }
 
@@ -101,8 +165,9 @@ export function drawEnemies(ctx, image, player, viewWidth, viewHeight, runnerIma
   for (let i = 0; i < MAX_ENEMIES; i += 1) {
     const corpse = corpses[i]; if (!corpse.active) continue;
     const x = snapWorldPixel(corpse.x); const y = snapWorldPixel(corpse.y);
-    const sprite = [sprites.walker, sprites.runner, sprites.tank, sprites.spitter, sprites.boss][corpse.type] || sprites.walker;
-    const size = snapWorldSize(DRAW_SIZES[["walker", "runner", "tank", "spitter", "boss"][corpse.type] || "walker"]);
+    const name = TYPE_NAMES[corpse.type] || "walker";
+    const sprite = sprites[name];
+    const size = snapWorldSize(DRAW_SIZES[name]);
     ctx.globalAlpha = corpse.life / 0.5; ctx.save(); ctx.translate(x, y);
     if (USE_V2_ASSETS) {
       const count = frameCount(sprite); const deathStart = Math.max(0, count - 3);
@@ -121,10 +186,10 @@ export function drawEnemies(ctx, image, player, viewWidth, viewHeight, runnerIma
     const y = snapWorldPixel(e.y);
     if (x < player.x - viewWidth / 2 - 56 || y < player.y - viewHeight / 2 - 56
       || x > player.x + viewWidth / 2 + 56 || y > player.y + viewHeight / 2 + 56) continue;
-    const name = ["walker", "runner", "tank", "spitter", "boss"][e.type] || "walker";
+    const name = TYPE_NAMES[e.type] || "walker";
     const sprite = USE_V2_ASSETS ? sprites[name] : (e.type ? runnerImage : image);
-    const size = USE_V2_ASSETS ? snapWorldSize(DRAW_SIZES[name] * (name === "runner" ? TYPES.runner.scale / 0.76 : 1))
-      : snapWorldSize(64 * (e.type ? TYPES.runner.scale : 1));
+    const size = USE_V2_ASSETS ? snapWorldSize(DRAW_SIZES[name] * ENEMY_CONFIG[name].scale)
+      : snapWorldSize(64 * ENEMY_CONFIG[name].scale);
     if (e.flash > 0) ctx.globalAlpha = 0.45;
     ctx.save(); ctx.translate(x, y);
     if (USE_V2_ASSETS) {
@@ -139,6 +204,18 @@ export function drawEnemies(ctx, image, player, viewWidth, viewHeight, runnerIma
   }
 }
 
+export function drawSpits(ctx, player, width, height) {
+  const left = player.x - width / 2; const right = player.x + width / 2;
+  const top = player.y - height / 2; const bottom = player.y + height / 2;
+  for (let i = 0; i < MAX_SPITS; i += 1) {
+    const spit = spits[i]; if (!spit.active || spit.x < left - 16 || spit.x > right + 16 || spit.y < top - 16 || spit.y > bottom + 16) continue;
+    const size = snapWorldSize(DRAW_SIZES.spit);
+    ctx.save(); ctx.translate(snapWorldPixel(spit.x), snapWorldPixel(spit.y)); ctx.rotate(quantizeDirection(Math.atan2(spit.vy, spit.vx)));
+    drawFrame(ctx, sprites.spit, Math.floor(spitFrameTime * 12) % frameCount(sprites.spit), -size / 2, -size / 2, size, size);
+    ctx.restore();
+  }
+}
+
 export function updateCorpses(dt) {
   for (let i = 0; i < MAX_ENEMIES; i += 1) if (corpses[i].active) { corpses[i].life -= dt; corpses[i].animation = Math.min(0.375, corpses[i].animation + dt); if (corpses[i].life <= 0) corpses[i].active = false; }
 }
@@ -146,4 +223,19 @@ export function updateCorpses(dt) {
 export function getEnemies() { return enemies; }
 export function getEnemyCount() { return activeCount; }
 export function getKillCount() { return kills; }
+export function getSpitCount() { let count = 0; for (let i = 0; i < MAX_SPITS; i += 1) if (spits[i].active) count += 1; return count; }
+export function isBossAlive() { for (let i = 0; i < MAX_ENEMIES; i += 1) if (enemies[i].active && enemies[i].type === ENEMY_CONFIG.boss.id) return true; return false; }
+export function hasBossSpawned() { return bossSpawned; }
+export function debugSpawnEnemy(typeName, player, x = player.x + 180, y = player.y) {
+  if (!ENEMY_CONFIG[typeName] || activeCount >= MAX_ENEMIES) return null;
+  const enemy = spawn(player, 0, 0, BOSS_SPAWN_TIME, typeName, { x, y });
+  if (typeName === "boss") bossSpawned = true;
+  rebuildEnemyHash();
+  return enemy;
+}
+export function getEnemyCountsByType() {
+  const counts = { walker: 0, runner: 0, tank: 0, spitter: 0, boss: 0 };
+  for (let i = 0; i < MAX_ENEMIES; i += 1) if (enemies[i].active) counts[TYPE_NAMES[enemies[i].type]] += 1;
+  return counts;
+}
 import { spawnParticles } from "./particles.js";
