@@ -96,10 +96,10 @@ function update(dt) {
 }
 
 function render() {
-  applyWorldTransform(context, pixelRatio, width, height, player.x, player.y);
+  const cameraX = snapWorldPixel(player.x); const cameraY = snapWorldPixel(player.y);
+  applyWorldTransform(context, pixelRatio, width, height, cameraX, cameraY);
   const viewWidth = width / WORLD_SCALE; const viewHeight = height / WORLD_SCALE;
   if (groundImages[0].complete && groundImages[0].naturalWidth) {
-    const cameraX = snapWorldPixel(player.x); const cameraY = snapWorldPixel(player.y);
     const cameraLeft = cameraX - viewWidth / 2; const cameraTop = cameraY - viewHeight / 2;
     const firstTileX = Math.floor(cameraLeft / TILE_SIZE); const firstTileY = Math.floor(cameraTop / TILE_SIZE);
     const lastTileX = Math.ceil((cameraLeft + viewWidth) / TILE_SIZE);
