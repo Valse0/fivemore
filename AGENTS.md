@@ -24,7 +24,7 @@ Game decisions are tracked in [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md). Read i
 - Touch first. Desktop keyboard (WASD) is optional and secondary.
 
 ## Art rules (important)
-- Use ONLY sprites from assets/graphs/ (Kenney Top-down Shooter, CC0). Keep license file.
+- Use sprites from assets/v2/ (AI-generated, owner approved)
 - Do NOT draw, generate, or invent new art. Do NOT use random emoji or geometric placeholders as final art.
 - Use only the zombie/survivor/tile sprites that exist. If a needed sprite is missing, ask the owner.
 
