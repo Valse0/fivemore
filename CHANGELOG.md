@@ -32,3 +32,4 @@
 - 2026-11-13: Added facing-direction auto-fire, aim assist, shoot pose, recoil, muzzle flash, improved bullets, and pooled combat sparks.
 - 2026-11-13: Added pooled death bursts and fading corpses, faceted XP gems, eased pickups, and level-up feedback.
 - 2026-11-13: Added synthesized gameplay sound effects and an intensity-layered survival music mode.
+- 2026-11-13 19:39 UTC: Switched gameplay character, zombie, effect, ground, and prop rendering to indexed v2 sprites with a Kenney query fallback.
