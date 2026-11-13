@@ -4,7 +4,7 @@ export const DRAW_SIZES = { survivor: 64, walker: 64, runner: 49, tank: 72, spit
 export const WORLD_SCALE = Number.isFinite(requestedScale) && requestedScale > 0 && requestedScale <= 2
   ? requestedScale
   : 0.7;
-export const AIM_ASSIST_DEG = 6;
+export const AIM_ASSIST_DEG = 15;
 export const MAX_PARTICLES = 300;
 let outputPixelRatio = 1;
 

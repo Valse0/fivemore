@@ -1,4 +1,5 @@
 # Changelog
+- 2026-11-13 20:18 UTC: Widened aim assist to 15 degrees while preserving straight projectile travel.
 - 2026-11-13 19:16 UTC: Added the v2 asset inventory report and session changelog, and refreshed the root report index.
 - 2026-11-13 19:14 UTC: Imported and indexed owner-made v2 visual and audio assets without resizing.
 - 2026-11-13 17:30 UTC: Linked the latest gameplay verification report from the root report index.
