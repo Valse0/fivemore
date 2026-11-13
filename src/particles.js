@@ -37,7 +37,7 @@ export function drawParticles(ctx, player, width, height) {
     ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
     const size = snapWorldSize(p.size);
     ctx.drawImage(atlas, p.color === "#fff4c7" ? 0 : p.color === "#8e3c39" ? 48 : 32, 0, 16, 16,
-      snapWorldPixel(p.x - player.x + width / 2 - p.size / 2), snapWorldPixel(p.y - player.y + height / 2 - p.size / 2), size, size);
+      snapWorldPixel(p.x - p.size / 2), snapWorldPixel(p.y - p.size / 2), size, size);
   }
   ctx.globalAlpha = 1;
 }

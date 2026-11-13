@@ -42,7 +42,9 @@ function fire(player) {
   for (let i = 0; i < MAX_BULLETS; i += 1) if (!bullets[i].active) { bullet = bullets[i]; break; }
   if (!bullet) return;
   const angle = candidate ? Math.atan2(candidate.y - player.y, candidate.x - player.x) : player.angle;
-  bullet.active = true; bullet.x = player.x; bullet.y = player.y;
+  bullet.active = true;
+  bullet.x = player.x + Math.cos(angle) * 40;
+  bullet.y = player.y + Math.sin(angle) * 40;
   bullet.vx = Math.cos(angle) * BULLET_SPEED; bullet.vy = Math.sin(angle) * BULLET_SPEED; bullet.life = 1.6;
   player.shotAngle = angle; player.firing = 0.08; player.recoil = 0.05;
   pistolShot();
@@ -72,7 +74,7 @@ export function updateWeapons(player, dt) {
 export function drawBullets(ctx, player, width, height) {
   for (let i = 0; i < MAX_BULLETS; i += 1) {
     const b = bullets[i]; if (!b.active) continue;
-    const x = snapWorldPixel(b.x - player.x + width / 2); const y = snapWorldPixel(b.y - player.y + height / 2);
+    const x = snapWorldPixel(b.x); const y = snapWorldPixel(b.y);
     const bulletWidth = snapWorldSize(4); const bulletHeight = snapWorldSize(10);
     ctx.save(); ctx.translate(x, y); ctx.rotate(quantizeDirection(Math.atan2(b.vy, b.vx))); ctx.fillStyle = "#f6ce67"; ctx.fillRect(-bulletWidth / 2, -bulletHeight / 2, bulletWidth, bulletHeight); ctx.fillStyle = "#fff4c7"; ctx.fillRect(-snapWorldSize(1), -snapWorldSize(4), snapWorldSize(2), snapWorldSize(7)); ctx.restore();
   }

@@ -61,7 +61,7 @@ export function updateXP(player, dt) {
 export function drawGems(ctx, player, width, height) {
   for (let i = 0; i < MAX_GEMS; i += 1) {
     const gem = gems[i]; if (!gem.active) continue;
-    const x = gem.x - player.x + width / 2; const y = gem.y - player.y + height / 2;
+    const x = snapWorldPixel(gem.x); const y = snapWorldPixel(gem.y);
     const bob = Math.sin(gem.age * 6) * 1.5; const pulse = 1 + Math.sin(gem.age * 8) * 0.08;
     const size = 14 * pulse * (gem.age < 0.22 ? Math.min(1, gem.age / 0.08) : 1);
     const gemSize = snapWorldSize(size);

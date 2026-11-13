@@ -97,7 +97,7 @@ export function updateEnemies(player, dt, time, width, height) {
 export function drawEnemies(ctx, image, player, viewWidth, viewHeight, runnerImage) {
   for (let i = 0; i < MAX_ENEMIES; i += 1) {
     const corpse = corpses[i]; if (!corpse.active) continue;
-    const x = snapWorldPixel(corpse.x - player.x + viewWidth / 2); const y = snapWorldPixel(corpse.y - player.y + viewHeight / 2);
+    const x = snapWorldPixel(corpse.x); const y = snapWorldPixel(corpse.y);
     const size = snapWorldSize(60);
     ctx.globalAlpha = corpse.life / 0.5; ctx.save(); ctx.translate(x, y); ctx.rotate(quantizeDirection(corpse.angle + Math.PI / 2));
     ctx.drawImage(corpse.type ? runnerImage : image, -size / 2, -size / 2, size, size); ctx.restore();
@@ -105,9 +105,10 @@ export function drawEnemies(ctx, image, player, viewWidth, viewHeight, runnerIma
   for (let i = 0; i < MAX_ENEMIES; i += 1) {
     const e = enemies[i];
     if (!e.active) continue;
-    const x = snapWorldPixel(e.x - player.x + viewWidth / 2);
-    const y = snapWorldPixel(e.y - player.y + viewHeight / 2);
-    if (x < -56 || y < -56 || x > viewWidth + 56 || y > viewHeight + 56) continue;
+    const x = snapWorldPixel(e.x);
+    const y = snapWorldPixel(e.y);
+    if (x < player.x - viewWidth / 2 - 56 || y < player.y - viewHeight / 2 - 56
+      || x > player.x + viewWidth / 2 + 56 || y > player.y + viewHeight / 2 + 56) continue;
     const sprite = e.type ? runnerImage : image;
     const size = snapWorldSize(64 * (e.type ? TYPES.runner.scale : 1));
     if (e.flash > 0) ctx.globalAlpha = 0.45;

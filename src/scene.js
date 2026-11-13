@@ -4,7 +4,7 @@ import { drawEnemies, getEnemyCount, getKillCount, forNearby, resetEnemies, upda
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
-import { quantizeDirection, snapWorldPixel, snapWorldSize, WORLD_SCALE } from "./config.js";
+import { applyWorldTransform, quantizeDirection, snapWorldPixel, snapWorldSize, WORLD_SCALE } from "./config.js";
 import { drawParticles, updateParticles } from "./particles.js";
 import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
 import { updateGameplayMusicTime, stopGameplayMusic } from "./audio.js";
@@ -96,22 +96,20 @@ function update(dt) {
 }
 
 function render() {
-  context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-  context.translate(width / 2, height / 2);
-  context.scale(WORLD_SCALE, WORLD_SCALE);
+  applyWorldTransform(context, pixelRatio, width, height, player.x, player.y);
   const viewWidth = width / WORLD_SCALE; const viewHeight = height / WORLD_SCALE;
   if (groundImages[0].complete && groundImages[0].naturalWidth) {
-    const cameraLeft = player.x - viewWidth / 2; const cameraTop = player.y - viewHeight / 2;
+    const cameraX = snapWorldPixel(player.x); const cameraY = snapWorldPixel(player.y);
+    const cameraLeft = cameraX - viewWidth / 2; const cameraTop = cameraY - viewHeight / 2;
     const firstTileX = Math.floor(cameraLeft / TILE_SIZE); const firstTileY = Math.floor(cameraTop / TILE_SIZE);
-    const offsetX = -(cameraLeft - firstTileX * TILE_SIZE); const offsetY = -(cameraTop - firstTileY * TILE_SIZE);
-    for (let y = offsetY - TILE_SIZE; y < viewHeight + TILE_SIZE; y += TILE_SIZE) {
-      const tileY = firstTileY + Math.floor((y - offsetY) / TILE_SIZE);
-      for (let x = offsetX - TILE_SIZE; x < viewWidth + TILE_SIZE; x += TILE_SIZE) {
-        const tileX = firstTileX + Math.floor((x - offsetX) / TILE_SIZE);
+    const lastTileX = Math.ceil((cameraLeft + viewWidth) / TILE_SIZE);
+    const lastTileY = Math.ceil((cameraTop + viewHeight) / TILE_SIZE);
+    for (let tileY = firstTileY; tileY <= lastTileY; tileY += 1) {
+      for (let tileX = firstTileX; tileX <= lastTileX; tileX += 1) {
         const variant = Math.abs((tileX * 73856093 ^ tileY * 19349663) % groundImages.length);
         const image = groundImages[variant];
         if (image.complete && image.naturalWidth) context.drawImage(image,
-          snapWorldPixel(x - viewWidth / 2), snapWorldPixel(y - viewHeight / 2), snapWorldSize(TILE_SIZE + 2), snapWorldSize(TILE_SIZE + 2));
+          snapWorldPixel(tileX * TILE_SIZE), snapWorldPixel(tileY * TILE_SIZE), snapWorldSize(TILE_SIZE + 2), snapWorldSize(TILE_SIZE + 2));
       }
     }
   }
@@ -125,14 +123,14 @@ function render() {
   }
   if (playerImage.complete && playerImage.naturalWidth) {
     if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
-    context.save(); context.translate(snapWorldPixel(-Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(-Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0)));
+    context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y - Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0)));
     context.rotate(quantizeDirection(player.angle));
     const playerSize = snapWorldSize(64);
     context.drawImage(player.firing > 0 ? playerImage : (standImage.complete ? standImage : playerImage), -playerSize / 2, -playerSize / 2, playerSize, playerSize);
     context.restore(); context.globalAlpha = 1;
     if (player.firing > 0) {
       context.save();
-      context.translate(snapWorldPixel(Math.cos(player.shotAngle) * 40), snapWorldPixel(Math.sin(player.shotAngle) * 40));
+      context.translate(snapWorldPixel(player.x + Math.cos(player.shotAngle) * 40), snapWorldPixel(player.y + Math.sin(player.shotAngle) * 40));
       context.rotate(quantizeDirection(player.shotAngle));
       context.globalCompositeOperation = "lighter";
       context.globalAlpha = Math.min(1, player.firing / 0.08);

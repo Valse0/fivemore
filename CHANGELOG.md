@@ -1,4 +1,5 @@
 # Changelog
+- 2026-11-13 17:20 UTC: Unified gameplay rendering in a snapped world-space camera transform and aligned bullets with the weapon muzzle.
 - 2026-11-13 13:52 UTC: Added the English bug-fix verification report and updated report.md.
 - 2026-11-13 13:42 UTC: Snapped sprite positions and sizes to whole pixels and quantized rotations to eight directions.
 - 2026-11-13 13:38 UTC: Replaced the cross-shaped muzzle graphic with a brief flare aligned to the projectile direction.
