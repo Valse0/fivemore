@@ -1,4 +1,5 @@
 # Changelog
+- 2026-11-13 13:42 UTC: Snapped sprite positions and sizes to whole pixels and quantized rotations to eight directions.
 - 2026-11-13 13:38 UTC: Replaced the cross-shaped muzzle graphic with a brief flare aligned to the projectile direction.
 - 2026-11-13 13:36 UTC: Centered varied Kenney ground tiles around the camera so terrain covers the full viewport.
 - 2026-11-13 13:35 UTC: Fixed the missing music bar duration that aborted game startup after the audio unlock gesture.

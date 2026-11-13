@@ -1,4 +1,4 @@
-import { MAX_PARTICLES } from "./config.js";
+import { MAX_PARTICLES, snapWorldPixel, snapWorldSize } from "./config.js";
 
 const particles = Array.from({ length: MAX_PARTICLES }, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0, maxLife: 0, size: 1, color: "#fff" }));
 const atlas = document.createElement("canvas");
@@ -35,8 +35,9 @@ export function drawParticles(ctx, player, width, height) {
   for (let i = 0; i < MAX_PARTICLES; i += 1) {
     const p = particles[i]; if (!p.active) continue;
     ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+    const size = snapWorldSize(p.size);
     ctx.drawImage(atlas, p.color === "#fff4c7" ? 0 : p.color === "#8e3c39" ? 48 : 32, 0, 16, 16,
-      p.x - player.x + width / 2 - p.size / 2, p.y - player.y + height / 2 - p.size / 2, p.size, p.size);
+      snapWorldPixel(p.x - player.x + width / 2 - p.size / 2), snapWorldPixel(p.y - player.y + height / 2 - p.size / 2), size, size);
   }
   ctx.globalAlpha = 1;
 }

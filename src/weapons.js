@@ -1,5 +1,5 @@
 import { damageEnemy, forNearby, getEnemies } from "./enemies.js";
-import { AIM_ASSIST_DEG } from "./config.js";
+import { AIM_ASSIST_DEG, quantizeDirection, snapWorldPixel, snapWorldSize } from "./config.js";
 import { spawnParticles } from "./particles.js";
 import { pistolShot, bulletHit, zombieDeath } from "./sfx.js";
 
@@ -72,8 +72,9 @@ export function updateWeapons(player, dt) {
 export function drawBullets(ctx, player, width, height) {
   for (let i = 0; i < MAX_BULLETS; i += 1) {
     const b = bullets[i]; if (!b.active) continue;
-    const x = b.x - player.x + width / 2; const y = b.y - player.y + height / 2;
-    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(b.vy, b.vx)); ctx.fillStyle = "#f6ce67"; ctx.fillRect(-2, -5, 4, 10); ctx.fillStyle = "#fff4c7"; ctx.fillRect(-1, -4, 2, 7); ctx.restore();
+    const x = snapWorldPixel(b.x - player.x + width / 2); const y = snapWorldPixel(b.y - player.y + height / 2);
+    const bulletWidth = snapWorldSize(4); const bulletHeight = snapWorldSize(10);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(quantizeDirection(Math.atan2(b.vy, b.vx))); ctx.fillStyle = "#f6ce67"; ctx.fillRect(-bulletWidth / 2, -bulletHeight / 2, bulletWidth, bulletHeight); ctx.fillStyle = "#fff4c7"; ctx.fillRect(-snapWorldSize(1), -snapWorldSize(4), snapWorldSize(2), snapWorldSize(7)); ctx.restore();
   }
 }
 

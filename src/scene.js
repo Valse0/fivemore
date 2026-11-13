@@ -4,7 +4,7 @@ import { drawEnemies, getEnemyCount, getKillCount, forNearby, resetEnemies, upda
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
-import { WORLD_SCALE } from "./config.js";
+import { quantizeDirection, snapWorldPixel, snapWorldSize, WORLD_SCALE } from "./config.js";
 import { drawParticles, updateParticles } from "./particles.js";
 import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
 import { updateGameplayMusicTime, stopGameplayMusic } from "./audio.js";
@@ -110,7 +110,8 @@ function render() {
         const tileX = firstTileX + Math.floor((x - offsetX) / TILE_SIZE);
         const variant = Math.abs((tileX * 73856093 ^ tileY * 19349663) % groundImages.length);
         const image = groundImages[variant];
-        if (image.complete && image.naturalWidth) context.drawImage(image, Math.round(x - viewWidth / 2), Math.round(y - viewHeight / 2), TILE_SIZE, TILE_SIZE);
+        if (image.complete && image.naturalWidth) context.drawImage(image,
+          snapWorldPixel(x - viewWidth / 2), snapWorldPixel(y - viewHeight / 2), snapWorldSize(TILE_SIZE + 2), snapWorldSize(TILE_SIZE + 2));
       }
     }
   }
@@ -124,14 +125,15 @@ function render() {
   }
   if (playerImage.complete && playerImage.naturalWidth) {
     if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
-    context.save(); context.translate(-Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0), -Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0));
-    context.rotate(player.angle + Math.PI / 2);
-    context.drawImage(player.firing > 0 ? playerImage : (standImage.complete ? standImage : playerImage), -32, -32, 64, 64);
+    context.save(); context.translate(snapWorldPixel(-Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(-Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0)));
+    context.rotate(quantizeDirection(player.angle));
+    const playerSize = snapWorldSize(64);
+    context.drawImage(player.firing > 0 ? playerImage : (standImage.complete ? standImage : playerImage), -playerSize / 2, -playerSize / 2, playerSize, playerSize);
     context.restore(); context.globalAlpha = 1;
     if (player.firing > 0) {
       context.save();
-      context.translate(Math.cos(player.shotAngle) * 20, Math.sin(player.shotAngle) * 20);
-      context.rotate(player.shotAngle);
+      context.translate(snapWorldPixel(Math.cos(player.shotAngle) * 40), snapWorldPixel(Math.sin(player.shotAngle) * 40));
+      context.rotate(quantizeDirection(player.shotAngle));
       context.globalCompositeOperation = "lighter";
       context.globalAlpha = Math.min(1, player.firing / 0.08);
       context.fillStyle = "#f6ce67";
