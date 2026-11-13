@@ -1,4 +1,5 @@
 # Changelog
+- 2026-11-13 19:14 UTC: Imported and indexed owner-made v2 visual and audio assets without resizing.
 - 2026-11-13 17:30 UTC: Linked the latest gameplay verification report from the root report index.
 - 2026-11-13 17:28 UTC: Recorded before/after Playwright measurements and phone verification notes for hata.md fixes.
 - 2026-11-13 17:27 UTC: Preserved fractional device-pixel ratios and snapped rendered positions to physical output pixels.
