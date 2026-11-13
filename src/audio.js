@@ -52,8 +52,29 @@ function getContext() {
 
 function enableIOSPlayback() {
   if (silentAudio) return;
-  // A one-frame silent WAV switches iOS Safari's audio session to playback.
-  silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+  // A short silent WAV switches iOS Safari's audio session to playback.
+  const sampleRate = 22050;
+  const sampleCount = sampleRate / 10;
+  const wav = new Uint8Array(44 + sampleCount * 2);
+  const view = new DataView(wav.buffer);
+  const writeText = (offset, value) => {
+    for (let index = 0; index < value.length; index += 1) wav[offset + index] = value.charCodeAt(index);
+  };
+  writeText(0, "RIFF");
+  view.setUint32(4, wav.length - 8, true);
+  writeText(8, "WAVEfmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeText(36, "data");
+  view.setUint32(40, sampleCount * 2, true);
+  let binary = "";
+  for (let index = 0; index < wav.length; index += 1) binary += String.fromCharCode(wav[index]);
+  silentAudio = new Audio(`data:audio/wav;base64,${btoa(binary)}`);
   silentAudio.loop = true;
   silentAudio.playsInline = true;
   silentAudio.volume = 0.001;
