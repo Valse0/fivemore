@@ -1,5 +1,4 @@
 export const MAX_ENEMIES = 150;
-const SPAWN_RADIUS = 440;
 const CELL_SIZE = 96;
 const HASH_SIZE = 257;
 const TYPES = {
@@ -33,7 +32,7 @@ function spawn(player, width, height, time) {
   for (let i = 0; i < MAX_ENEMIES; i += 1) if (!enemies[i].active) { enemy = enemies[i]; break; }
   if (!enemy) return;
   const angle = Math.random() * Math.PI * 2;
-  const distance = Math.max(SPAWN_RADIUS, Math.hypot(width, height) * 0.58);
+  const distance = Math.hypot(width, height) * 0.58;
   const type = time >= 60 && spawnOrdinal % 4 === 0 ? 1 : 0;
   const stats = TYPES[type ? "runner" : "walker"];
   enemy.active = true;

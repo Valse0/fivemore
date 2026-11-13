@@ -1,4 +1,5 @@
 # Changelog
+- 2026-11-13 13:33 UTC: Set the camera scale to 0.7 by default, added ?scale= overrides, and tied enemy spawns to the visible world size.
 
 - 2026-11-13: Reworked the procedural soundtrack into a 104 BPM synthwave loop with staged layers and compressed levels.
 - 2026-11-13: Added pooled Walker/Runner combat, pistol fire, XP pickups, phone HUD, and run-end screens.
