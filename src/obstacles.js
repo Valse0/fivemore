@@ -1,4 +1,4 @@
-import { OBSTACLE_RADII } from "./config.js";
+import { OBSTACLE_RADII, isInsideArena, clampArenaX, clampArenaY } from "./config.js";
 
 const CELL_SIZE = 192;
 const OBJECT_TYPES = ["crate", "barrel", "rock", "tree", "flowers"];
@@ -8,7 +8,9 @@ function objectInCell(gx, gy) {
   if (hash % 7 !== 0) return null;
   const type = OBJECT_TYPES[(hash >>> 4) % OBJECT_TYPES.length];
   if (type === "flowers") return null;
-  return { x: gx * CELL_SIZE + 96, y: gy * CELL_SIZE + 96, radius: OBSTACLE_RADII[type] };
+  const x = gx * CELL_SIZE + 96; const y = gy * CELL_SIZE + 96; const radius = OBSTACLE_RADII[type];
+  if (!isInsideArena(x, y, radius)) return null;
+  return { x, y, radius };
 }
 
 function collides(x, y, radius) {
@@ -47,8 +49,8 @@ export function segmentBlockedByObstacle(x1, y1, x2, y2, radius = 0) {
 }
 
 export function moveCircle(entity, dx, dy, radius) {
-  const nextX = entity.x + dx;
+  const nextX = clampArenaX(entity.x + dx, radius);
   if (!collides(nextX, entity.y, radius)) entity.x = nextX;
-  const nextY = entity.y + dy;
+  const nextY = clampArenaY(entity.y + dy, radius);
   if (!collides(entity.x, nextY, radius)) entity.y = nextY;
 }

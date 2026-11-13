@@ -7,6 +7,11 @@ export const WORLD_SCALE = Number.isFinite(requestedScale) && requestedScale > 0
 export const AIM_ASSIST_DEG = 15;
 export const OBSTACLE_RADII = { crate: 18, barrel: 14, rock: 20, tree: 14 };
 export const PLAYER_COLLIDER_RADIUS = 14;
+export const ARENA_W = 1600;
+export const ARENA_H = 2000;
+export const ARENA_EDGE_WIDTH = 8;
+export const ARENA_EDGE_COLOR = "#302923";
+export const ARENA_EDGE_ACCENT = "#d5a653";
 export const PLAYER_HURT_DURATION = 0.15;
 export const PLAYER_HURT_TINT_ALPHA = 0.45;
 export const PLAYER_HURT_RECOIL_DISTANCE = 6;
@@ -28,6 +33,18 @@ export const ENEMY_CONFIG = {
   boss: { id: 4, hp: 2400, speed: 20, damage: 28, radius: 40, xp: 12, spawnWeight: 0, startTime: BOSS_SPAWN_TIME, scale: 1.5, attackAnimation: "attack" },
 };
 export const MAX_PARTICLES = 300;
+
+export function clampArenaX(x, radius = 0) {
+  return Math.max(-ARENA_W / 2 + radius, Math.min(ARENA_W / 2 - radius, x));
+}
+
+export function clampArenaY(y, radius = 0) {
+  return Math.max(-ARENA_H / 2 + radius, Math.min(ARENA_H / 2 - radius, y));
+}
+
+export function isInsideArena(x, y, radius = 0) {
+  return Math.abs(x) + radius <= ARENA_W / 2 && Math.abs(y) + radius <= ARENA_H / 2;
+}
 let outputPixelRatio = 1;
 
 export function setOutputPixelRatio(value) {

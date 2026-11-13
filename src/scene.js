@@ -4,7 +4,7 @@ import { drawEnemies, drawSpits, getEnemyCount, getKillCount, getEnemies, getEne
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
-import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA } from "./config.js";
+import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, isInsideArena } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { drawParticles, updateParticles } from "./particles.js";
 import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
@@ -161,9 +161,19 @@ function render() {
       const h=(gx*73856093 ^ gy*19349663)>>>0; if (h%7!==0) continue;
       const sprite=worldObjectSprites[(h>>>4)%worldObjectSprites.length];
       const frame=(h>>>8)%frameCount(sprite); const base=Number(sprite.dataset.frameSize); const size=snapWorldSize(base);
-      drawFrame(context,sprite,frame,snapWorldPixel(gx*192+96-size/2),snapWorldPixel(gy*192+96-size/2),size,size,base);
+      const objectX = gx * 192 + 96; const objectY = gy * 192 + 96;
+      if (!isInsideArena(objectX, objectY, base / 2)) continue;
+      drawFrame(context,sprite,frame,snapWorldPixel(objectX-size/2),snapWorldPixel(objectY-size/2),size,size,base);
     }
   }
+  context.save();
+  context.lineWidth = ARENA_EDGE_WIDTH / WORLD_SCALE;
+  context.strokeStyle = ARENA_EDGE_COLOR;
+  context.strokeRect(-ARENA_W / 2, -ARENA_H / 2, ARENA_W, ARENA_H);
+  context.lineWidth = 2 / WORLD_SCALE;
+  context.strokeStyle = ARENA_EDGE_ACCENT;
+  context.strokeRect(-ARENA_W / 2, -ARENA_H / 2, ARENA_W, ARENA_H);
+  context.restore();
   drawGems(context, player, viewWidth, viewHeight, null);
   drawEnemies(context, runnerImage, player, viewWidth, viewHeight, tintedRunner);
   drawSpits(context, player, viewWidth, viewHeight);

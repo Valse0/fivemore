@@ -1,4 +1,4 @@
-import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS, ENEMY_CONFIG, SPITTER_CONFIG, BOSS_SPAWN_TIME } from "./config.js";
+import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS, ENEMY_CONFIG, SPITTER_CONFIG, BOSS_SPAWN_TIME, clampArenaX, clampArenaY } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { moveCircle, segmentBlockedByObstacle } from "./obstacles.js";
 
@@ -62,7 +62,10 @@ function chooseSpawnType(time) {
 function spawn(player, width, height, time, typeName = chooseSpawnType(time), position = null) {
   const angle = Math.random() * Math.PI * 2;
   const distance = typeName === "boss" ? Math.min(width, height) * 0.3 : Math.hypot(width, height) * 0.58;
-  const enemy = allocateEnemy(typeName, position?.x ?? player.x + Math.cos(angle) * distance, position?.y ?? player.y + Math.sin(angle) * distance);
+  const stats = ENEMY_CONFIG[typeName];
+  const x = clampArenaX(position?.x ?? player.x + Math.cos(angle) * distance, stats.radius);
+  const y = clampArenaY(position?.y ?? player.y + Math.sin(angle) * distance, stats.radius);
+  const enemy = allocateEnemy(typeName, x, y);
   if (!enemy) return null;
   spawnOrdinal += 1;
   return enemy;
