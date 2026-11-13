@@ -2,6 +2,7 @@
 - 2026-11-13 17:01 Peru: Removed the stuck hurt pose and added configured red hit tint and collision-safe recoil.
 - 2026-11-13 16:32 Peru: Documented the separate Agent Sprite Forge installation, asset test, API checks, and local credential setup.
 # Changelog
+- 2026-11-13 18:46 Peru: Added a pooled acid splat animation when spitter projectiles hit the player or an obstacle.
 - 2026-11-13 18:43 Peru: Played manifest-driven enemy attack animations only on successful contact damage.
 - 2026-11-13 18:38 Peru: Imported 14 new owner-made v2 sprites and five category manifests; updated the asset index from manifest metadata.
 - 2026-11-13 19:31 Peru: Centralized muzzle offset so initial bullets and muzzle placement share the same configured origin.

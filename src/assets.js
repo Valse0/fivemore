@@ -14,6 +14,7 @@ const definitions = {
   spitterAttack: ["zombies/spitter_attack_spritesheet.png", 64, null],
   bossAttack: ["zombies/boss_attack_spritesheet.png", 128, null],
   bullet: ["effects/bullet_spritesheet.png", 32, null], spit: ["effects/acid_spit_spritesheet.png", 32, null],
+  acidSplat: ["effects/acid_splat_spritesheet.png", 32, null],
   muzzle: ["effects/muzzle_flash_spritesheet.png", 32, null], spark: ["effects/hit_spark_spritesheet.png", 32, null],
   gem: ["effects/xp_gems_spritesheet.png", 24, null], grass: ["world/grass_tiles_spritesheet.png", 32, null],
   crate: ["world/crate_spritesheet.png", 48, null], barrel: ["world/barrel_spritesheet.png", 48, null],

@@ -25,6 +25,8 @@ export const ENEMY_ATTACK_ANIMATIONS = {
   spitter: { sprite: "spitterAttack", firstFrame: 0, lastFrame: 3, fps: 8, frameSize: 64 },
   boss: { sprite: "bossAttack", firstFrame: 0, lastFrame: 3, fps: 6, frameSize: 128 },
 };
+// Frames and rate copied from assets/v2/effects/manifest.json.
+export const ACID_SPLAT_CONFIG = { firstFrame: 0, lastFrame: 3, fps: 10, frameSize: 32, duration: 0.4, drawSize: 48 };
 export const SPITTER_CONFIG = {
   preferredDistance: 220,
   attackRange: 270,

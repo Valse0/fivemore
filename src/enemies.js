@@ -1,4 +1,4 @@
-import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS, ENEMY_CONFIG, ENEMY_ATTACK_ANIMATIONS, SPITTER_CONFIG, BOSS_SPAWN_TIME, clampArenaX, clampArenaY } from "./config.js";
+import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS, ENEMY_CONFIG, ENEMY_ATTACK_ANIMATIONS, ACID_SPLAT_CONFIG, SPITTER_CONFIG, BOSS_SPAWN_TIME, clampArenaX, clampArenaY } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { moveCircle, segmentBlockedByObstacle } from "./obstacles.js";
 
@@ -10,6 +10,7 @@ const enemies = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0
 const corpses = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, angle: 0, type: 0, life: 0, animation: 0 }));
 const MAX_SPITS = 48;
 const spits = Array.from({ length: MAX_SPITS }, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0 }));
+const splats = Array.from({ length: MAX_SPITS }, () => ({ active: false, x: 0, y: 0, life: 0 }));
 const bucketHeads = new Int16Array(HASH_SIZE);
 let spawnClock = 0;
 let spawnOrdinal = 0;
@@ -19,6 +20,15 @@ let animationTime = 0;
 let bossSpawned = false;
 let spitDamageCallback = null;
 let spitFrameTime = 0;
+
+function spawnSplat(x, y) {
+  for (let i = 0; i < MAX_SPITS; i += 1) {
+    const splat = splats[i];
+    if (splat.active) continue;
+    splat.active = true; splat.x = x; splat.y = y; splat.life = ACID_SPLAT_CONFIG.duration;
+    return;
+  }
+}
 
 function allocateEnemy(typeName, x, y) {
   let enemy = null;
@@ -44,6 +54,7 @@ export function resetEnemies() {
   for (let i = 0; i < MAX_ENEMIES; i += 1) enemies[i].active = false;
   for (let i = 0; i < MAX_ENEMIES; i += 1) corpses[i].active = false;
   for (let i = 0; i < MAX_SPITS; i += 1) spits[i].active = false;
+  for (let i = 0; i < MAX_SPITS; i += 1) splats[i].active = false;
   spawnClock = 0; spawnOrdinal = 0; activeCount = 0; kills = 0; bossSpawned = false; spitFrameTime = 0;
 }
 
@@ -95,13 +106,19 @@ function updateSpits(player, dt) {
     const oldX = spit.x; const oldY = spit.y;
     const nextX = oldX + spit.vx * dt; const nextY = oldY + spit.vy * dt;
     spit.life -= dt;
-    if (!SPITTER_CONFIG.spitPassesObstacles && segmentBlockedByObstacle(oldX, oldY, nextX, nextY, SPITTER_CONFIG.spitRadius)) { spit.active = false; continue; }
+    if (!SPITTER_CONFIG.spitPassesObstacles && segmentBlockedByObstacle(oldX, oldY, nextX, nextY, SPITTER_CONFIG.spitRadius)) { spawnSplat(nextX, nextY); spit.active = false; continue; }
     if (pointSegmentDistanceSquared(player.x, player.y, oldX, oldY, nextX, nextY) <= (SPITTER_CONFIG.spitRadius + 14) ** 2) {
       if (spitDamageCallback) spitDamageCallback(SPITTER_CONFIG.spitDamage, { x: oldX, y: oldY, angle: Math.atan2(-spit.vy, -spit.vx), active: true });
+      spawnSplat(player.x, player.y);
       spit.active = false; continue;
     }
     spit.x = nextX; spit.y = nextY;
     if (spit.life <= 0) spit.active = false;
+  }
+  for (let i = 0; i < MAX_SPITS; i += 1) {
+    const splat = splats[i]; if (!splat.active) continue;
+    splat.life -= dt;
+    if (splat.life <= 0) splat.active = false;
   }
 }
 
@@ -221,6 +238,13 @@ export function drawSpits(ctx, player, width, height) {
   const left = player.x - width / 2; const right = player.x + width / 2;
   const top = player.y - height / 2; const bottom = player.y + height / 2;
   for (let i = 0; i < MAX_SPITS; i += 1) {
+    const splat = splats[i]; if (!splat.active || splat.x < left - 32 || splat.x > right + 32 || splat.y < top - 32 || splat.y > bottom + 32) continue;
+    const elapsed = ACID_SPLAT_CONFIG.duration - splat.life;
+    const frame = ACID_SPLAT_CONFIG.firstFrame + Math.min(ACID_SPLAT_CONFIG.lastFrame - ACID_SPLAT_CONFIG.firstFrame, Math.floor(elapsed * ACID_SPLAT_CONFIG.fps));
+    const size = snapWorldSize(ACID_SPLAT_CONFIG.drawSize);
+    drawFrame(ctx, sprites.acidSplat, frame, snapWorldPixel(splat.x - size / 2), snapWorldPixel(splat.y - size / 2), size, size, ACID_SPLAT_CONFIG.frameSize);
+  }
+  for (let i = 0; i < MAX_SPITS; i += 1) {
     const spit = spits[i]; if (!spit.active || spit.x < left - 16 || spit.x > right + 16 || spit.y < top - 16 || spit.y > bottom + 16) continue;
     const size = snapWorldSize(DRAW_SIZES.spit);
     ctx.save(); ctx.translate(snapWorldPixel(spit.x), snapWorldPixel(spit.y)); ctx.rotate(quantizeDirection(Math.atan2(spit.vy, spit.vx)));
@@ -237,6 +261,7 @@ export function getEnemies() { return enemies; }
 export function getEnemyCount() { return activeCount; }
 export function getKillCount() { return kills; }
 export function getSpitCount() { let count = 0; for (let i = 0; i < MAX_SPITS; i += 1) if (spits[i].active) count += 1; return count; }
+export function getSplatCount() { let count = 0; for (let i = 0; i < MAX_SPITS; i += 1) if (splats[i].active) count += 1; return count; }
 export function isBossAlive() { for (let i = 0; i < MAX_ENEMIES; i += 1) if (enemies[i].active && enemies[i].type === ENEMY_CONFIG.boss.id) return true; return false; }
 export function hasBossSpawned() { return bossSpawned; }
 export function debugSpawnEnemy(typeName, player, x = player.x + 180, y = player.y) {
