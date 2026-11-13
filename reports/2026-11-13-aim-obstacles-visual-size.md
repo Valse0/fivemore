@@ -70,3 +70,7 @@ The baseline muzzle-to-bullet difference improved from 42 px to 24 px. The movem
 1. On an iPhone, steer into a tree trunk and a rock/barrel/crate; verify the survivor stops at the base and can slide along it.
 2. Let a zombie approach a prop and verify it routes around the body; fire through a prop and confirm bullets continue.
 3. Observe repeated shots for the directional amber muzzle light and confirm the survivor looks larger without changing contact distance.
+
+## Report index update
+
+At 2026-11-13 20:30 UTC, `report.md` was updated to summarize this task, link its detailed measurements and screenshots, and surface the UNVERIFIED items. The task implementation timing above remains 20:18:43–20:26:18 UTC.
