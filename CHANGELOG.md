@@ -1,4 +1,5 @@
 # Changelog
+- 2026-11-13 17:30 UTC: Linked the latest gameplay verification report from the root report index.
 - 2026-11-13 17:28 UTC: Recorded before/after Playwright measurements and phone verification notes for hata.md fixes.
 - 2026-11-13 17:27 UTC: Preserved fractional device-pixel ratios and snapped rendered positions to physical output pixels.
 - 2026-11-13 17:24 UTC: Made ground tiles mostly grass with deterministic, clustered dirt patches.

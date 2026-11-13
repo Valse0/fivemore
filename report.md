@@ -2,6 +2,12 @@ Start time: 2026-11-13 13:30:50 UTC
 End time: 2026-11-13 13:50:19 UTC
 Total duration: 19 minutes 29 seconds (local time: UTC)
 
+## Güncel rapor — 2026-11-13
+
+`hata.md` maddeleri için son oynanış ölçümleri, kök neden, değişen dosyalar, ekran görüntüleri ve doğrulanamayan kontroller [ayrıntılı raporda](reports/2026-11-13-coordinate-bug-fixes.md) yer alıyor. Ortak dünya/kamera koordinatı düzeltildi; zemin titreşimi ve deseni ile kesirli DPR çizimi düzenlendi. Otomatik ölçümde mermi/namlu farkı 468.51 px'ten 24 px'e, gem çizim/toplama farkı 6.5 px'e indi. Ayrı düzeltme commit'leri: `82dd2e2`, `282fcdd`, `f5828e3`, `b7c6b53`.
+
+Bu dosyanın aşağıdaki önceki raporu 2026-11-13 13:30–13:50 arasındaki çalışmayı kaydeder; güncel hata düzeltmelerinin ayrıntıları için yukarıdaki raporu kullanın.
+
 # FIVEMORE Bug Fix Report — 2026-11-13
 
 ## Summary
