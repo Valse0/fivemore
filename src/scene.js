@@ -23,11 +23,6 @@ const groundImages = Array.from({ length: 6 }, (_, index) => {
   image.src = `assets/graphs/kenney/PNG/Tiles/tile_${String(index + 1).padStart(2, "0")}.png`;
   return image;
 });
-const muzzleFlash = document.createElement("canvas");
-muzzleFlash.width = 24; muzzleFlash.height = 24;
-const muzzleContext = muzzleFlash.getContext("2d");
-muzzleContext.fillStyle = "#fff4c7"; muzzleContext.beginPath(); muzzleContext.arc(12, 12, 5, 0, Math.PI * 2); muzzleContext.fill();
-muzzleContext.fillStyle = "#f6ce67"; muzzleContext.fillRect(10, 1, 4, 22); muzzleContext.fillRect(1, 10, 22, 4);
 playerImage.src = "assets/graphs/kenney/PNG/Survivor%201/survivor1_gun.png";
 standImage.src = "assets/graphs/kenney/PNG/Survivor%201/survivor1_stand.png";
 runnerImage.src = "assets/graphs/kenney/PNG/Zombie%201/zoimbie1_stand.png";
@@ -132,12 +127,19 @@ function render() {
     context.save(); context.translate(-Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0), -Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0));
     context.rotate(player.angle + Math.PI / 2);
     context.drawImage(player.firing > 0 ? playerImage : (standImage.complete ? standImage : playerImage), -32, -32, 64, 64);
-    if (player.firing > 0) {
-      context.globalAlpha = player.firing > 0.04 ? 1 : 0.62;
-      context.drawImage(muzzleFlash, 17, -12, 20, 20);
-      context.globalAlpha = 1;
-    }
     context.restore(); context.globalAlpha = 1;
+    if (player.firing > 0) {
+      context.save();
+      context.translate(Math.cos(player.shotAngle) * 20, Math.sin(player.shotAngle) * 20);
+      context.rotate(player.shotAngle);
+      context.globalCompositeOperation = "lighter";
+      context.globalAlpha = Math.min(1, player.firing / 0.08);
+      context.fillStyle = "#f6ce67";
+      context.beginPath(); context.moveTo(0, 0); context.lineTo(14, -4); context.lineTo(10, 0); context.lineTo(14, 4); context.closePath(); context.fill();
+      context.fillStyle = "#fff4c7";
+      context.beginPath(); context.moveTo(1, 0); context.lineTo(10, -1); context.lineTo(7, 0); context.lineTo(10, 1); context.closePath(); context.fill();
+      context.restore(); context.globalAlpha = 1; context.globalCompositeOperation = "source-over";
+    }
   }
   if (levelFlash > 0) { context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0); context.globalAlpha = levelFlash * 0.35 / 0.16; context.fillStyle = "#fff4c7"; context.fillRect(0, 0, width, height); context.globalAlpha = 1; }
 }

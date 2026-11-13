@@ -44,7 +44,7 @@ function fire(player) {
   const angle = candidate ? Math.atan2(candidate.y - player.y, candidate.x - player.x) : player.angle;
   bullet.active = true; bullet.x = player.x; bullet.y = player.y;
   bullet.vx = Math.cos(angle) * BULLET_SPEED; bullet.vy = Math.sin(angle) * BULLET_SPEED; bullet.life = 1.6;
-  player.firing = 0.08; player.recoil = 0.05;
+  player.shotAngle = angle; player.firing = 0.08; player.recoil = 0.05;
   pistolShot();
 }
 
