@@ -1,65 +1,84 @@
-# Game Feel Update — 2026-11-13
+Start time: 2026-11-13 13:30:50 UTC
+End time: 2026-11-13 13:50:19 UTC
+Total duration: 19 minutes 29 seconds (local time: UTC)
+
+# FIVEMORE Bug Fix Report — 2026-11-13
 
 ## Summary
 
-Implemented the camera zoom, directional pistol feel, pooled combat particles, enemy death and XP pickup feedback, level-up heal/visuals, synthesized sound effects, and a gameplay music arrangement. No card system was added, and no menu or support screen content was changed. The camera uses a 1.5× world scale, yielding a nominal 42.7 px player on a 390 px wide screen from the existing 64 px sprite.
+Completed the five requested gameplay bug fixes. `WORLD_SCALE` defaults to 0.7 and accepts `?scale=0.6`; enemy spawn distance and scene bounds use the scaled viewport. The camera-centered ground now covers the full canvas with varied Kenney tiles. Audio starts from the first user gesture, and the missing music bar duration that previously aborted game startup is defined. Effects and music use separate buses. The muzzle effect is a short directional flare aligned to the shot angle. Canvas smoothing is disabled, sprite sizes and positions are snapped to whole display pixels, and sprite rotations are quantized to eight directions.
 
-Four implementation commits were created, one per part: `a33aba1` (A), `5f4ef78` (B), `03a9fd6` (C), and the audio/report commit (D).
-
-## Skills used (concrete techniques from each SKILL.md)
-
-- **game-engine:** Kept the existing requestAnimationFrame/fixed-step update structure; used fixed-capacity object pools for particles and existing bullets/enemies/gems; derived the camera from canvas dimensions and device pixel ratio; generated effects and sound through Canvas 2D and Web Audio; retained the existing user-gesture audio unlock.
-- **frontend-design:** Kept feedback legible and restrained in the existing HUD language; used brief action-triggered motion (pickup pulse, toast, ring, and flash) instead of adding persistent visual clutter; preserved the current portrait layout and menu/support screens.
+The audio startup error was fixed before map verification because it stopped the game screen from initializing.
 
 ## Changed files
 
-- `src/config.js` — centralized `WORLD_SCALE`, `AIM_ASSIST_DEG`, and particle cap.
-- `src/scene.js` — scaled world camera, level-up feedback, particle drawing/update, hurt and ambient sounds, gameplay music time, run-end fade.
-- `src/player.js`, `src/weapons.js` — retained facing, aim assist, straight bullets, firing pose, recoil and flash, combat sparks, shot/hit/death sounds.
-- `src/particles.js` — fixed 300-slot particle pool and pre-rendered particle atlas.
-- `src/enemies.js` — fixed enemy/corpse storage, death bursts, fading corpses, brief hit flash state.
-- `src/xp.js`, `src/hud.js` — pre-rendered faceted colored gems, pop/bob/pulse, attraction, XP feedback, 10 HP level heal trigger.
-- `src/audio.js`, `src/sfx.js`, `src/music.js` — effects bus routing, synthesized SFX, voice limit, gameplay music mode and intensity.
-- `CHANGELOG.md` — one entry for each part.
-- `reports/2026-11-13-game-feel.md`, `report.md` — this report and its requested copy.
+- `src/config.js` — default scale 0.7, bounded `?scale=` override, pixel snapping and eight-direction helpers.
+- `src/enemies.js` — spawn distance derives from the visible world size; enemy and corpse rendering uses pixel snapping and eight directions.
+- `src/scene.js` — camera-centered varied ground tiles, pixel-aligned sprite rendering, corrected player facing, and directional muzzle flare.
+- `src/music.js` — defined the missing bar duration used when building the music pad.
+- `src/player.js`, `src/weapons.js` — retain the actual shot angle for the muzzle effect and render bullets with pixel-aligned dimensions and eight-direction rotation.
+- `src/particles.js`, `src/xp.js` — pixel-aligned effect and gem rendering.
+- `CHANGELOG.md` — timestamped entries for the five fixes and this report update.
+- `reports/screenshots/01-camera.png` through `reports/screenshots/05-pixels.png` — Playwright captures at 390×844.
+- `reports/2026-11-13-bug-fixes.md`, `report.md` — detailed report and root report copy.
 
-## Commands run
+## Commits
 
-- Read project instructions, design/sprite docs, and both requested skills with `cat`.
-- Inspected source/status with `rg`, `sed`, and `git status`/`git diff`.
-- Applied source edits with `apply_patch` and a heredoc write for `src/xp.js` and this report.
-- Created four commits with `git commit`.
-- No tests, builds, or runtime verification were run.
+- `18ef0c0` — Fix camera world scale and spawn distance.
+- `6cdfc29` — Fix music startup after audio unlock.
+- `a8ccfd9` — Fix full-screen varied ground rendering.
+- `c86bf29` — Fix muzzle flash direction and shape.
+- `f0dab33` — Fix pixel sprite scaling and directions.
 
-## Problems and errors (exact text)
+## Verified
 
-- An early Part B patch did not apply because its context did not match: `Script error: apply_patch verification failed: Failed to find expected lines in /home/alisaimdemir02/fivemore/src/weapons.js: let bulletX = 0; let bulletY = 0; let hitIndex = -1;`
-- Re-read `src/weapons.js`, reapplied the change against its actual contents, and continued. No part was abandoned.
-- No test or build errors were produced because none were run.
+Playwright ran at 390×844 with the default scale and with `?scale=0.6`. The canvas bounds were `[0,0,390,844]`, `imageSmoothingEnabled` was `false`, all four sampled screen corners contained ground, and the audio debug status reported `Audio: running` after tapping Play.
 
-## How to test on iPhone
+- Camera and default scale: `reports/screenshots/01-camera.png`
+- Full-screen varied map at `?scale=0.6`: `reports/screenshots/02-map.png`
+- Audio startup: `reports/screenshots/03-audio.png`
+- Directional muzzle flare: `reports/screenshots/04-muzzle.png`
+- Pixel rendering at `?scale=0.6`: `reports/screenshots/05-pixels.png`
 
-1. Open the static-hosted game on an iPhone 11 Safari at 390 × 844 CSS px and start a run. Check that the survivor is about 40–48 px tall and the spawn ring stays outside the visible play area.
-2. Drag the lower-screen joystick, stop, and confirm the survivor keeps facing the last movement direction and fires that way. Move an enemy near the 6° aim cone and check the slight snap; bullets should travel straight.
-3. Watch a shot at normal speed: survivor switches to the gun pose, muzzle flashes, and recoils briefly. Check bullet readability and hit sparks.
-4. Defeat enemies and collect gems. Confirm blue/green/purple values, pop and bob, attraction, sparkle, XP pulse, brief corpse fade, and the level-up ring/flash/toast plus 10 HP recovery.
-5. With sound unmuted, start from a tap and listen for shots, hits, deaths, occasional distant groans, pickups, level-up, hurt, game over, and gameplay music. Check mute and both volume settings, then return to the menu and confirm menu music resumes.
-6. Use `?debug=1` to watch FPS/enemy/bullet counts during a crowded run; the target is 60 fps with 150 enemies.
+Audio bus analysis while playing the settings test tone showed music output remained active while the effects bus carried the tone:
 
-## Config constants to tune (list with defaults)
+```text
+{"before":{"state":"Audio: running · gain 0.70","taps":[0.005236233054083793,0]},"during":{"state":"Audio: running · gain 0.70","taps":[0.005190500885124341,0.02242907046456221]},"after":{"state":"Audio: running · gain 0.70","taps":[0.003126525506559008,0]},"consoleErrors":["Failed to load resource: the server responded with a status of 404 (File not found) {\"url\":\"http://127.0.0.1:8000/favicon.ico\",\"line\":0,\"column\":0,\"lineNumber\":0,\"columnNumber\":0}","Failed to load resource: the server responded with a status of 404 (File not found) {\"url\":\"http://127.0.0.1:8000/favicon.ico\",\"line\":0,\"column\":0,\"lineNumber\":0,\"columnNumber\":0}"]}
+```
 
-- `WORLD_SCALE`: `1.5`
-- `AIM_ASSIST_DEG`: `6`
-- `MAX_PARTICLES`: `300`
-- `MAX_ENEMIES`: `150`
-- `MAX_BULLETS`: `48`
-- `BULLET_SPEED`: `520` world units/s
-- `SPAWN_RADIUS`: `440` world units, with a viewport diagonal fallback
-- Gem pool: `150`; pickup radius: `135`; contact pickup radius: `23`
-- Fire interval: `0.5` s; damage: `18`; player move speed: `180`; max HP: `100`
-- SFX simultaneous voices: `12`; ambient groan limiter: `1.5` s
-- Gameplay music: intensity step every `30` s; boss layer from `270` s; fade-in `1.5` s
+The directional muzzle fill was observed during capture (12 draws). Changed JavaScript modules passed `node --check`; `git diff --check origin/main..HEAD` passed. Final worktree was clean, with five local commits ahead of `origin/main`.
 
-## Suggested next step
+## Unverified
 
-Run the iPhone checks above and tune camera scale, gem values/drop rates, and music intensity against actual device performance and feel.
+- **UNVERIFIED:** A completely error-free browser console. Chromium reports two 404s for its automatic `/favicon.ico` request. Game assets returned HTTP 200 and there were no application JavaScript exceptions.
+- **UNVERIFIED:** Playback and visual quality on a physical iPhone Safari device.
+
+## Problems
+
+The only observed browser console errors were the two automatic `/favicon.ico` 404s from the local static server. This repository does not contain a favicon; the game assets and application modules loaded successfully.
+
+## Phone checks
+
+1. On iPhone Safari, start a run and confirm the default camera view feels right; also open `?scale=0.6` to check the debug override.
+2. Check that the Kenney ground covers the full screen while moving and that no world edge or blank strip appears.
+3. With sound unmuted, tap Play and listen for the menu/game music and effects. Use Settings → Test sound and confirm music continues during the effect.
+4. Observe repeated shots and confirm the brief flare follows the bullet direction and appears at the weapon muzzle.
+5. Check that survivor, enemy, bullet, and gem edges remain crisp during movement and turning.
+
+## Verification commands
+
+- `node /tmp/fivemore-final-check.cjs '?debug=1' reports/screenshots/01-camera.png`
+- `node /tmp/fivemore-final-check.cjs '?scale=0.6&debug=1' reports/screenshots/02-map.png` (also run for captures 03 and 05)
+- Playwright 390×844 audio-bus check using the Settings test tone.
+- `node --check` on the changed JavaScript modules.
+- `git diff --check origin/main..HEAD`
+
+## Playwright output (verbatim)
+
+```text
+{"scale":0.7,"viewport":[390,844],"canvas":{"bounds":[0,0,390,844],"backing":[390,844],"smoothing":false},"audio":"Audio: running · gain 0.84","state":"Audio: running","corners":[[39,174,96,255],[39,174,96,255],[39,174,96,255],[39,174,96,255]],"consoleErrors":["Failed to load resource: the server responded with a status of 404 (File not found)","Failed to load resource: the server responded with a status of 404 (File not found)"],"httpErrors":[]}
+{"scale":0.6,"viewport":[390,844],"canvas":{"bounds":[0,0,390,844],"backing":[390,844],"smoothing":false},"audio":"Audio: running · gain 0.84","state":"Audio: running","corners":[[187,128,68,255],[187,128,68,255],[39,174,96,255],[39,174,96,255]],"consoleErrors":["Failed to load resource: the server responded with a status of 404 (File not found)","Failed to load resource: the server responded with a status of 404 (File not found)"],"httpErrors":[]}
+{"scale":0.6,"viewport":[390,844],"canvas":{"bounds":[0,0,390,844],"backing":[390,844],"smoothing":false},"audio":"Audio: running · gain 0.84","state":"Audio: running","corners":[[187,128,68,255],[187,128,68,255],[39,174,96,255],[39,174,96,255]],"consoleErrors":["Failed to load resource: the server responded with a status of 404 (File not found)","Failed to load resource: the server responded with a status of 404 (File not found)"],"httpErrors":[]}
+{"scale":0.6,"viewport":[390,844],"canvas":{"bounds":[0,0,390,844],"backing":[390,844],"smoothing":false},"audio":"Audio: running · gain 0.84","state":"Audio: running","corners":[[187,128,68,255],[187,128,68,255],[39,174,96,255],[39,174,96,255]],"consoleErrors":["Failed to load resource: the server responded with a status of 404 (File not found)","Failed to load resource: the server responded with a status of 404 (File not found)"],"httpErrors":[]}
+{"scale":0.6,"viewport":[390,844],"canvas":{"bounds":[0,0,390,844],"backing":[390,844],"smoothing":false},"audio":"Audio: running · gain 0.75","state":"Audio: running","corners":[[187,128,68,255],[187,128,68,255],[39,174,96,255],[39,174,96,255]],"consoleErrors":["Failed to load resource: the server responded with a status of 404 (File not found)","Failed to load resource: the server responded with a status of 404 (File not found)"],"httpErrors":[]}
+```
