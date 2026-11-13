@@ -18,7 +18,11 @@ const context = canvas.getContext("2d", { alpha: false });
 const playerImage = new Image();
 const standImage = new Image();
 const runnerImage = new Image();
-const groundImage = new Image();
+const groundImages = Array.from({ length: 6 }, (_, index) => {
+  const image = new Image();
+  image.src = `assets/graphs/kenney/PNG/Tiles/tile_${String(index + 1).padStart(2, "0")}.png`;
+  return image;
+});
 const muzzleFlash = document.createElement("canvas");
 muzzleFlash.width = 24; muzzleFlash.height = 24;
 const muzzleContext = muzzleFlash.getContext("2d");
@@ -27,7 +31,6 @@ muzzleContext.fillStyle = "#f6ce67"; muzzleContext.fillRect(10, 1, 4, 22); muzzl
 playerImage.src = "assets/graphs/kenney/PNG/Survivor%201/survivor1_gun.png";
 standImage.src = "assets/graphs/kenney/PNG/Survivor%201/survivor1_stand.png";
 runnerImage.src = "assets/graphs/kenney/PNG/Zombie%201/zoimbie1_stand.png";
-groundImage.src = "assets/graphs/kenney/PNG/Tiles/tile_05.png";
 let tintedRunner = null;
 runnerImage.addEventListener("load", () => {
   tintedRunner = document.createElement("canvas");
@@ -99,17 +102,22 @@ function update(dt) {
 
 function render() {
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-  context.fillStyle = "#765b3c"; context.fillRect(0, 0, width, height);
   context.translate(width / 2, height / 2);
   context.scale(WORLD_SCALE, WORLD_SCALE);
   const viewWidth = width / WORLD_SCALE; const viewHeight = height / WORLD_SCALE;
-  if (groundImage.complete && groundImage.naturalWidth) {
+  if (groundImages[0].complete && groundImages[0].naturalWidth) {
     const cameraLeft = player.x - viewWidth / 2; const cameraTop = player.y - viewHeight / 2;
     const firstTileX = Math.floor(cameraLeft / TILE_SIZE); const firstTileY = Math.floor(cameraTop / TILE_SIZE);
     const offsetX = -(cameraLeft - firstTileX * TILE_SIZE); const offsetY = -(cameraTop - firstTileY * TILE_SIZE);
-    for (let y = offsetY - TILE_SIZE; y < viewHeight + TILE_SIZE; y += TILE_SIZE)
-      for (let x = offsetX - TILE_SIZE; x < viewWidth + TILE_SIZE; x += TILE_SIZE)
-        context.drawImage(groundImage, Math.round(x), Math.round(y), TILE_SIZE, TILE_SIZE);
+    for (let y = offsetY - TILE_SIZE; y < viewHeight + TILE_SIZE; y += TILE_SIZE) {
+      const tileY = firstTileY + Math.floor((y - offsetY) / TILE_SIZE);
+      for (let x = offsetX - TILE_SIZE; x < viewWidth + TILE_SIZE; x += TILE_SIZE) {
+        const tileX = firstTileX + Math.floor((x - offsetX) / TILE_SIZE);
+        const variant = Math.abs((tileX * 73856093 ^ tileY * 19349663) % groundImages.length);
+        const image = groundImages[variant];
+        if (image.complete && image.naturalWidth) context.drawImage(image, Math.round(x - viewWidth / 2), Math.round(y - viewHeight / 2), TILE_SIZE, TILE_SIZE);
+      }
+    }
   }
   drawGems(context, player, viewWidth, viewHeight, null);
   drawEnemies(context, runnerImage, player, viewWidth, viewHeight, tintedRunner);
