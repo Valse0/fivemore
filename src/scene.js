@@ -177,7 +177,7 @@ function render() {
     const sprite = sprites.survivor; const size = snapWorldSize(DRAW_SIZES.survivor); const count = frameCount(sprite);
     const walkFrames = Math.max(1, count - 2);
     if (player.hp > 0 || deathVisualTime < 0.4) {
-      const frame = player.hp <= 0 ? count - 1 : Math.floor(visualTime * (movement.x || movement.y ? 9 : 3)) % walkFrames;
+      const frame = player.hp <= 0 ? count - 1 : (movement.x || movement.y ? Math.floor(visualTime * 9) % walkFrames : 0);
       context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y));
       if (Math.cos(player.angle) < 0) context.scale(-1, 1);
       if (player.hurtTimer > 0 && hurtSprite) context.drawImage(hurtSprite, frame * 64, 0, 64, 64, -size / 2, -size / 2, size, size);
