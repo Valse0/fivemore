@@ -41,6 +41,7 @@ runnerImage.addEventListener("load", () => {
 let width = 0; let height = 0; let pixelRatio = 1;
 let active = false; let initialized = false; let ended = false;
 let levelFlash = 0; let levelWave = 0;
+let deathVisualTime = 0;
 let ambientClock = 0;
 let previousTime = 0; let accumulator = 0; let runTime = 0;
 let fpsFrames = 0; let fpsTime = 0; let fps = 0;
@@ -70,6 +71,7 @@ function resize() {
 function resetRun() {
   player.x = 0; player.y = 0; player.angle = -Math.PI / 2; player.hp = 100; player.invulnerable = 0;
   levelFlash = 0; levelWave = 1;
+  deathVisualTime = 0;
   ambientClock = 0;
   runTime = 0; ended = false;
   resetEnemies(); resetWeapons(); resetXP(); resetHUD();
@@ -152,11 +154,13 @@ function render() {
   if (USE_V2_ASSETS) {
     const sprite = sprites.survivor; const size = snapWorldSize(DRAW_SIZES.survivor); const count = frameCount(sprite);
     const hurtFrame = Math.max(0, count - 2); const walkFrames = Math.max(1, count - 2);
-    const frame = player.invulnerable > 0 ? hurtFrame : Math.floor(visualTime * (movement.x || movement.y ? 9 : 3)) % walkFrames;
-    if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
-    context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y));
-    if (Math.cos(player.angle) < 0) context.scale(-1, 1);
-    drawFrame(context, sprite, frame, -size / 2, -size / 2, size, size); context.restore(); context.globalAlpha = 1;
+    if (player.hp > 0 || deathVisualTime < 0.4) {
+      const frame = player.hp <= 0 ? count - 1 : player.invulnerable > 0 ? hurtFrame : Math.floor(visualTime * (movement.x || movement.y ? 9 : 3)) % walkFrames;
+      if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
+      context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y));
+      if (Math.cos(player.angle) < 0) context.scale(-1, 1);
+      drawFrame(context, sprite, frame, -size / 2, -size / 2, size, size); context.restore(); context.globalAlpha = 1;
+    }
   } else if (playerImage.complete && playerImage.naturalWidth) {
     if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
     context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y - Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0)));
@@ -188,7 +192,10 @@ function render() {
 
 function frame(timestamp) {
   requestAnimationFrame(frame);
-  if (!active) return;
+  if (!active) {
+    if (ended && player.hp <= 0) { deathVisualTime = Math.min(0.4, deathVisualTime + 1/60); render(); }
+    return;
+  }
   if (!previousTime) previousTime = timestamp;
   const delta = Math.min(MAX_FRAME, (timestamp - previousTime) / 1000); previousTime = timestamp; accumulator += delta;
   while (accumulator >= STEP && active) { update(STEP); accumulator -= STEP; }
