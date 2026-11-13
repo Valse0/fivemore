@@ -17,6 +17,14 @@ export const PLAYER_HURT_DURATION = 0.15;
 export const PLAYER_HURT_TINT_ALPHA = 0.45;
 export const PLAYER_HURT_RECOIL_DISTANCE = 6;
 export const BOSS_SPAWN_TIME = 300;
+// Frame ranges and rates copied from assets/v2/zombies/manifest.json.
+export const ENEMY_ATTACK_ANIMATIONS = {
+  walker: { sprite: "walkerAttack", firstFrame: 0, lastFrame: 3, fps: 9, frameSize: 64 },
+  runner: { sprite: "runnerAttack", firstFrame: 0, lastFrame: 3, fps: 11, frameSize: 64 },
+  tank: { sprite: "tankAttack", firstFrame: 0, lastFrame: 3, fps: 7, frameSize: 96 },
+  spitter: { sprite: "spitterAttack", firstFrame: 0, lastFrame: 3, fps: 8, frameSize: 64 },
+  boss: { sprite: "bossAttack", firstFrame: 0, lastFrame: 3, fps: 6, frameSize: 128 },
+};
 export const SPITTER_CONFIG = {
   preferredDistance: 220,
   attackRange: 270,

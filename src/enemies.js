@@ -1,4 +1,4 @@
-import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS, ENEMY_CONFIG, SPITTER_CONFIG, BOSS_SPAWN_TIME, clampArenaX, clampArenaY } from "./config.js";
+import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS, ENEMY_CONFIG, ENEMY_ATTACK_ANIMATIONS, SPITTER_CONFIG, BOSS_SPAWN_TIME, clampArenaX, clampArenaY } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { moveCircle, segmentBlockedByObstacle } from "./obstacles.js";
 
@@ -6,7 +6,7 @@ export const MAX_ENEMIES = 150;
 const CELL_SIZE = 96;
 const HASH_SIZE = 257;
 const TYPE_NAMES = ["walker", "runner", "tank", "spitter", "boss"];
-const enemies = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, hp: 0, speed: 0, damage: 0, radius: 0, xp: 0, type: 0, angle: 0, next: -1, flash: 0, spitClock: 0 }));
+const enemies = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, hp: 0, speed: 0, damage: 0, radius: 0, xp: 0, type: 0, angle: 0, next: -1, flash: 0, spitClock: 0, attackTimer: 0 }));
 const corpses = Array.from({ length: MAX_ENEMIES }, () => ({ active: false, x: 0, y: 0, angle: 0, type: 0, life: 0, animation: 0 }));
 const MAX_SPITS = 48;
 const spits = Array.from({ length: MAX_SPITS }, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, life: 0 }));
@@ -28,7 +28,7 @@ function allocateEnemy(typeName, x, y) {
   enemy.active = true; enemy.x = x; enemy.y = y;
   enemy.hp = stats.hp; enemy.speed = stats.speed; enemy.damage = stats.damage;
   enemy.radius = stats.radius; enemy.xp = stats.xp; enemy.type = stats.id;
-  enemy.angle = 0; enemy.next = -1; enemy.flash = 0; enemy.spitClock = SPITTER_CONFIG.attackInterval;
+  enemy.angle = 0; enemy.next = -1; enemy.flash = 0; enemy.spitClock = SPITTER_CONFIG.attackInterval; enemy.attackTimer = 0;
   activeCount += 1;
   return enemy;
 }
@@ -146,6 +146,7 @@ export function updateEnemies(player, dt, time, width, height, onPlayerDamage = 
     const e = enemies[i];
     if (!e.active) continue;
     e.flash = Math.max(0, e.flash - dt);
+    e.attackTimer = Math.max(0, e.attackTimer - dt);
     const dx = player.x - e.x; const dy = player.y - e.y;
     const distance = Math.hypot(dx, dy) || 1;
     e.angle = Math.atan2(dy, dx);
@@ -197,8 +198,17 @@ export function drawEnemies(ctx, image, player, viewWidth, viewHeight, runnerIma
     ctx.save(); ctx.translate(x, y);
     if (USE_V2_ASSETS) {
       if (Math.cos(e.angle) < 0) ctx.scale(-1, 1);
-      const frames = frameCount(sprite); const frame = Math.floor(animationTime * 8) % Math.max(1, frames - 2);
-      drawFrame(ctx, sprite, frame, -size / 2, -size / 2, size, size);
+      const attack = ENEMY_ATTACK_ANIMATIONS[name];
+      const attackSprite = attack && sprites[attack.sprite];
+      if (attack && e.attackTimer > 0 && attackSprite?.complete && attackSprite.naturalWidth) {
+        const duration = (attack.lastFrame - attack.firstFrame + 1) / attack.fps;
+        const elapsed = duration - e.attackTimer;
+        const frame = attack.firstFrame + Math.min(attack.lastFrame - attack.firstFrame, Math.floor(elapsed * attack.fps));
+        drawFrame(ctx, attackSprite, frame, -size / 2, -size / 2, size, size, attack.frameSize);
+      } else {
+        const frames = frameCount(sprite); const frame = Math.floor(animationTime * 8) % Math.max(1, frames - 2);
+        drawFrame(ctx, sprite, frame, -size / 2, -size / 2, size, size);
+      }
     } else {
       ctx.rotate(quantizeDirection(e.angle+Math.PI/2)); ctx.drawImage(sprite || image, -size/2, -size/2, size, size);
     }

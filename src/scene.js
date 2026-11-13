@@ -4,7 +4,7 @@ import { drawEnemies, drawSpits, getEnemyCount, getKillCount, getEnemies, getEne
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
-import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, WEAPON_MUZZLE_OFFSET, isInsideArena } from "./config.js";
+import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, WEAPON_MUZZLE_OFFSET, ENEMY_ATTACK_ANIMATIONS, isInsideArena } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { drawParticles, updateParticles } from "./particles.js";
 import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
@@ -77,7 +77,10 @@ function takeContactDamage(enemy) {
   if (!enemy.active) return;
   const dx = player.x - enemy.x; const dy = player.y - enemy.y;
   const radius = enemy.radius + 18;
-  if (dx * dx + dy * dy <= radius * radius) takePlayerDamage(enemy.damage, enemy);
+  if (dx * dx + dy * dy <= radius * radius && takePlayerDamage(enemy.damage, enemy)) {
+    const attack = ENEMY_ATTACK_ANIMATIONS[enemy.type === 0 ? "walker" : enemy.type === 1 ? "runner" : enemy.type === 2 ? "tank" : enemy.type === 3 ? "spitter" : "boss"];
+    if (attack) enemy.attackTimer = (attack.lastFrame - attack.firstFrame + 1) / attack.fps;
+  }
 }
 
 function resize() {
