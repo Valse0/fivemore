@@ -1,4 +1,5 @@
 # Changelog
+- 2026-11-13 20:22 UTC: Increased survivor draw size from 64 to 76 world units without changing collision radius.
 - 2026-11-13 20:21 UTC: Added configured circular collisions and axis sliding around static props for survivors and zombies.
 - 2026-11-13 20:19 UTC: Removed the white inner muzzle flare, retaining the directional amber muzzle light.
 - 2026-11-13 20:18 UTC: Widened aim assist to 15 degrees while preserving straight projectile travel.

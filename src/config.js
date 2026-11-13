@@ -1,6 +1,6 @@
 const requestedScale = Number(new URLSearchParams(location.search).get("scale"));
 export const USE_V2_ASSETS = new URLSearchParams(location.search).get("assets") !== "kenney";
-export const DRAW_SIZES = { survivor: 64, walker: 64, runner: 49, tank: 72, spitter: 64, boss: 96, bullet: 16, spit: 20, muzzle: 24, spark: 24, gem: 24, tile: 32 };
+export const DRAW_SIZES = { survivor: 76, walker: 64, runner: 49, tank: 72, spitter: 64, boss: 96, bullet: 16, spit: 20, muzzle: 24, spark: 24, gem: 24, tile: 32 };
 export const WORLD_SCALE = Number.isFinite(requestedScale) && requestedScale > 0 && requestedScale <= 2
   ? requestedScale
   : 0.7;
