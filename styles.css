@@ -64,7 +64,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 .screen { flex: 1; display: flex; flex-direction: column; }
 .screen[hidden] { display: none; }
-.home-screen { position: relative; justify-content: center; padding-block: clamp(26px, 5vh, 48px) 18px; }
+.home-screen { position: relative; justify-content: flex-start; padding-block: 26px 8px; }
 .home-topline { position: absolute; top: 8px; right: 0; left: 0; display: flex; justify-content: flex-end; }
 .heart-button {
   width: 52px;
@@ -198,7 +198,7 @@ input[type="checkbox"][role="switch"]:checked::before { transform: translateX(24
 .site-footer { min-height: 36px; margin-top: auto; padding-top: 14px; color: #7f887c; font-size: 9px; letter-spacing: .06em; }
 
 @media (max-height: 700px) {
-  .home-screen { padding-block: 14px 8px; }
+  .home-screen { padding-block: 16px 5px; }
   .survivor-scene { height: 132px; margin-block: 11px; }
   .scene-survivor { width: 102px; height: 86px; }
   .scene-zombie { width: 66px; height: 86px; }
