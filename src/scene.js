@@ -106,7 +106,11 @@ function render() {
     const lastTileY = Math.ceil((cameraTop + viewHeight) / TILE_SIZE);
     for (let tileY = firstTileY; tileY <= lastTileY; tileY += 1) {
       for (let tileX = firstTileX; tileX <= lastTileX; tileX += 1) {
-        const variant = Math.abs((tileX * 73856093 ^ tileY * 19349663) % groundImages.length);
+        const tileHash = (tileX * 73856093 ^ tileY * 19349663) >>> 0;
+        const patchX = Math.floor(tileX / 2); const patchY = Math.floor(tileY / 2);
+        const patchHash = (patchX * 83492791 ^ patchY * 2971215073) >>> 0;
+        const dirtPatch = patchHash % 10 === 0;
+        const variant = dirtPatch ? 4 + tileHash % 2 : tileHash % 4;
         const image = groundImages[variant];
         if (image.complete && image.naturalWidth) context.drawImage(image,
           snapWorldPixel(tileX * TILE_SIZE), snapWorldPixel(tileY * TILE_SIZE), snapWorldSize(TILE_SIZE + 2), snapWorldSize(TILE_SIZE + 2));
