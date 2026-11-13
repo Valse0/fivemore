@@ -1,4 +1,14 @@
-# Current report — 2026-11-13 20:18–20:26 UTC
+# Oturum raporu — 2026-11-13 (Peru, UTC-5)
+
+## Agent Sprite Forge kurulumu, varlık denemesi ve API kontrolü
+
+Bu oturumdaki ayrı işin ayrıntılı kaydı: [Agent Sprite Forge oturum raporu](reports/2026-11-13-agent-sprite-forge-session.md).
+
+Repo dışına Agent Sprite Forge skill klasörleri kuruldu ve `/tmp/anim-test/` altında iki piksel sheet’i ile manifest üretildi. Codex görsel route’u bu oturumda kullanılamadı; Gemini görüntü istekleri kota/kimlik doğrulama hatası verdi. Salt-okunur Gemini `models.list` kontrolü yalnızca ikinci anahtarın `l` → `I` varyantında HTTP 200 döndürdü. Kullanıcının talebiyle o varyant `.env.local` içine yerel ve ignore edilmiş biçimde kaydedildi; commit’e alınmıyor.
+
+FIVEMORE oyun kodu ve `assets/` değişmedi. Commit kapsamı bu iki rapor belgesi ve proje yönergesinin gerektirdiği tek satırlık changelog kaydıdır.
+
+## Önceki gameplay rapor özeti
 
 The latest gameplay work is documented in [the detailed aim, obstacle and survivor-size report](reports/2026-11-13-aim-obstacles-visual-size.md). Four task commits widened aim assist to 15°, removed the white inner muzzle flash, added circular prop collision for players and zombies, and increased survivor draw size while keeping its collider fixed.
 
