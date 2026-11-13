@@ -112,7 +112,7 @@ function update(dt) {
   updateEnemies(player, dt, runTime, width / WORLD_SCALE, height / WORLD_SCALE, takePlayerDamage);
   updateCorpses(dt);
   forNearby(player.x, player.y, takeContactDamage);
-  updateWeapons(player, dt);
+  updateWeapons(player, dt, width / WORLD_SCALE, height / WORLD_SCALE);
   updateParticles(dt);
   if (updateXP(player, dt)) { player.hp = Math.min(100, player.hp + 10); levelFlash = 0.16; levelWave = 0; }
   updateHUD(runTime, player.hp);

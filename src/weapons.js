@@ -36,10 +36,19 @@ export function resetWeapons() {
   fireClock = 0;
 }
 
-function fire(player) {
+function fire(player, viewWidth, viewHeight) {
   bulletX = player.x; bulletY = player.y; aimAngle = player.angle; candidate = null; candidateDistance = Infinity;
   const available = getEnemies();
-  for (let i = 0; i < available.length; i += 1) selectNearest(available[i], i);
+  const halfWidth = viewWidth / 2; const halfHeight = viewHeight / 2;
+  let visibleEnemy = false;
+  for (let i = 0; i < available.length; i += 1) {
+    const enemy = available[i];
+    if (!enemy.active || enemy.x < player.x - halfWidth || enemy.x > player.x + halfWidth
+      || enemy.y < player.y - halfHeight || enemy.y > player.y + halfHeight) continue;
+    visibleEnemy = true;
+    selectNearest(enemy, i);
+  }
+  if (!visibleEnemy) return;
   let bullet = null;
   for (let i = 0; i < MAX_BULLETS; i += 1) if (!bullets[i].active) { bullet = bullets[i]; break; }
   if (!bullet) return;
@@ -52,11 +61,11 @@ function fire(player) {
   pistolShot();
 }
 
-export function updateWeapons(player, dt) {
+export function updateWeapons(player, dt, viewWidth, viewHeight) {
   visualTime += dt;
   player.firing = Math.max(0, player.firing - dt); player.recoil = Math.max(0, player.recoil - dt);
   fireClock -= dt;
-  if (fireClock <= 0) { fire(player); fireClock += 0.5; }
+  if (fireClock <= 0) { fire(player, viewWidth, viewHeight); fireClock += 0.5; }
   const enemies = getEnemies();
   for (let i = 0; i < MAX_BULLETS; i += 1) {
     const bullet = bullets[i];
