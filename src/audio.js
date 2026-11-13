@@ -1,3 +1,5 @@
+import { startMenuMusic } from "./music.js";
+
 const STORAGE_KEY = "fivemore-audio-settings";
 
 const defaults = { music: 70, effects: 80, muted: false };
@@ -5,9 +7,6 @@ let settings = readSettings();
 let context = null;
 let musicBus = null;
 let effectsBus = null;
-
-// Empty CC0 music slot: assign a locally hosted CC0 track here when one exists.
-const musicTrack = null;
 
 function readSettings() {
   try {
@@ -48,9 +47,7 @@ export function startAudioFromGesture() {
   }
 
   if (context.state === "suspended") context.resume();
-  // No source is connected while musicTrack is empty; playback begins only
-  // from a later user gesture after a CC0 track has been added.
-  void musicTrack;
+  startMenuMusic(context, musicBus);
 }
 
 export function getAudioSettings() {
