@@ -5,6 +5,7 @@ import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWe
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
 import { WORLD_SCALE } from "./config.js";
+import { drawParticles, updateParticles } from "./particles.js";
 
 const TILE_SIZE = 64;
 const STEP = 1 / 60;
@@ -13,9 +14,16 @@ const movement = { x: 0, y: 0 };
 const canvas = document.querySelector("#game-canvas");
 const context = canvas.getContext("2d", { alpha: false });
 const playerImage = new Image();
+const standImage = new Image();
 const runnerImage = new Image();
 const groundImage = new Image();
+const muzzleFlash = document.createElement("canvas");
+muzzleFlash.width = 24; muzzleFlash.height = 24;
+const muzzleContext = muzzleFlash.getContext("2d");
+muzzleContext.fillStyle = "#fff4c7"; muzzleContext.beginPath(); muzzleContext.arc(12, 12, 5, 0, Math.PI * 2); muzzleContext.fill();
+muzzleContext.fillStyle = "#f6ce67"; muzzleContext.fillRect(10, 1, 4, 22); muzzleContext.fillRect(1, 10, 22, 4);
 playerImage.src = "assets/graphs/kenney/PNG/Survivor%201/survivor1_gun.png";
+standImage.src = "assets/graphs/kenney/PNG/Survivor%201/survivor1_stand.png";
 runnerImage.src = "assets/graphs/kenney/PNG/Zombie%201/zoimbie1_stand.png";
 groundImage.src = "assets/graphs/kenney/PNG/Tiles/tile_05.png";
 let tintedRunner = null;
@@ -67,6 +75,7 @@ function update(dt) {
   updateEnemies(player, dt, runTime, width / WORLD_SCALE, height / WORLD_SCALE);
   forNearby(player.x, player.y, takeContactDamage);
   updateWeapons(player, dt);
+  updateParticles(dt);
   updateXP(player, dt);
   updateHUD(runTime, player.hp);
   if (player.hp <= 0 || runTime >= 300) {
@@ -93,10 +102,18 @@ function render() {
   drawGems(context, player, viewWidth, viewHeight, null);
   drawEnemies(context, runnerImage, player, viewWidth, viewHeight, tintedRunner);
   drawBullets(context, player, viewWidth, viewHeight);
+  drawParticles(context, player, viewWidth, viewHeight);
   if (playerImage.complete && playerImage.naturalWidth) {
     if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
-    context.save(); context.translate(0, 0);
-    context.rotate(player.angle); context.drawImage(playerImage, -32, -32, 64, 64); context.restore(); context.globalAlpha = 1;
+    context.save(); context.translate(-Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0), -Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0));
+    context.rotate(player.angle + Math.PI / 2);
+    context.drawImage(player.firing > 0 ? playerImage : (standImage.complete ? standImage : playerImage), -32, -32, 64, 64);
+    if (player.firing > 0) {
+      context.globalAlpha = player.firing > 0.04 ? 1 : 0.62;
+      context.drawImage(muzzleFlash, 17, -12, 20, 20);
+      context.globalAlpha = 1;
+    }
+    context.restore(); context.globalAlpha = 1;
   }
 }
 

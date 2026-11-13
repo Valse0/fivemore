@@ -1,4 +1,6 @@
 import { damageEnemy, forNearby, getEnemies } from "./enemies.js";
+import { AIM_ASSIST_DEG } from "./config.js";
+import { spawnParticles } from "./particles.js";
 
 const MAX_BULLETS = 48;
 const BULLET_SPEED = 520;
@@ -8,12 +10,15 @@ let killsCallback = null;
 let candidate = null;
 let candidateDistance = Infinity;
 let bulletX = 0; let bulletY = 0; let hitIndex = -1;
+let aimAngle = 0;
 
 function selectNearest(enemy, index) {
   if (!enemy.active) return;
   const dx = enemy.x - bulletX; const dy = enemy.y - bulletY;
   const distance = dx * dx + dy * dy;
-  if (distance < candidateDistance) { candidate = enemy; candidateDistance = distance; }
+  const angle = Math.atan2(dy, dx);
+  const delta = Math.atan2(Math.sin(angle - aimAngle), Math.cos(angle - aimAngle));
+  if (Math.abs(delta) <= AIM_ASSIST_DEG * Math.PI / 180 && distance < candidateDistance) { candidate = enemy; candidateDistance = distance; }
 }
 
 function findBulletHit(enemy, index) {
@@ -29,20 +34,20 @@ export function resetWeapons() {
 }
 
 function fire(player) {
-  bulletX = player.x; bulletY = player.y; candidate = null; candidateDistance = Infinity;
+  bulletX = player.x; bulletY = player.y; aimAngle = player.angle; candidate = null; candidateDistance = Infinity;
   const available = getEnemies();
   for (let i = 0; i < available.length; i += 1) selectNearest(available[i], i);
-  if (!candidate) return;
   let bullet = null;
   for (let i = 0; i < MAX_BULLETS; i += 1) if (!bullets[i].active) { bullet = bullets[i]; break; }
   if (!bullet) return;
-  const dx = candidate.x - player.x; const dy = candidate.y - player.y;
-  const distance = Math.hypot(dx, dy) || 1;
+  const angle = candidate ? Math.atan2(candidate.y - player.y, candidate.x - player.x) : player.angle;
   bullet.active = true; bullet.x = player.x; bullet.y = player.y;
-  bullet.vx = dx / distance * BULLET_SPEED; bullet.vy = dy / distance * BULLET_SPEED; bullet.life = 1.6;
+  bullet.vx = Math.cos(angle) * BULLET_SPEED; bullet.vy = Math.sin(angle) * BULLET_SPEED; bullet.life = 1.6;
+  player.firing = 0.08; player.recoil = 0.05;
 }
 
 export function updateWeapons(player, dt) {
+  player.firing = Math.max(0, player.firing - dt); player.recoil = Math.max(0, player.recoil - dt);
   fireClock -= dt;
   if (fireClock <= 0) { fire(player); fireClock += 0.5; }
   const enemies = getEnemies();
@@ -54,6 +59,7 @@ export function updateWeapons(player, dt) {
     bulletX = bullet.x; bulletY = bullet.y; hitIndex = -1;
     forNearby(bullet.x, bullet.y, findBulletHit);
     if (hitIndex !== -1) {
+      spawnParticles(bullet.x, bullet.y, 5, "spark");
       if (damageEnemy(hitIndex, 18) && killsCallback) killsCallback(enemies[hitIndex].x, enemies[hitIndex].y);
       bullet.active = false;
     } else if (bullet.life <= 0) bullet.active = false;
@@ -61,11 +67,10 @@ export function updateWeapons(player, dt) {
 }
 
 export function drawBullets(ctx, player, width, height) {
-  ctx.fillStyle = "#f6ce67";
   for (let i = 0; i < MAX_BULLETS; i += 1) {
     const b = bullets[i]; if (!b.active) continue;
     const x = b.x - player.x + width / 2; const y = b.y - player.y + height / 2;
-    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(b.vy, b.vx)); ctx.fillRect(-1, -3, 2, 6); ctx.restore();
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(b.vy, b.vx)); ctx.fillStyle = "#f6ce67"; ctx.fillRect(-2, -5, 4, 10); ctx.fillStyle = "#fff4c7"; ctx.fillRect(-1, -4, 2, 7); ctx.restore();
   }
 }
 
