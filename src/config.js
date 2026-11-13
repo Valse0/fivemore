@@ -13,6 +13,13 @@ export const ARENA_EDGE_WIDTH = 8;
 export const ARENA_EDGE_COLOR = "#302923";
 export const ARENA_EDGE_ACCENT = "#d5a653";
 export const WEAPON_MUZZLE_OFFSET = 40;
+export const WEAPON_COLLISION_RADIUS = 4;
+export const BREAKABLE_CONFIG = {
+  crate: { hits: 3, healthPickupAmount: 25, breakFirstFrame: 0, breakLastFrame: 4, breakFps: 10, frameSize: 48, breakDuration: 0.5, drawSize: 48 },
+  barrel: { hits: 2, blastRadius: 120, blastDamage: 45, explodeFirstFrame: 0, explodeLastFrame: 6, explodeFps: 12, frameSize: 96, explosionDuration: 7 / 12, explosionDrawSize: 96, burnmarkDrawSize: 72 },
+};
+export const HEALTH_PICKUP_CONFIG = { frameSize: 32, firstFrame: 0, lastFrame: 1, fps: 4, drawSize: 32, lifetime: 12, pickupRadius: 42 };
+export const PLAYER_MAX_HP = 100;
 export const PLAYER_HURT_DURATION = 0.15;
 export const PLAYER_HURT_TINT_ALPHA = 0.45;
 export const PLAYER_HURT_RECOIL_DISTANCE = 6;

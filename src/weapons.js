@@ -1,8 +1,10 @@
 import { damageEnemy, forNearby, getEnemies } from "./enemies.js";
-import { AIM_ASSIST_DEG, WEAPON_MUZZLE_OFFSET, quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS } from "./config.js";
+import { AIM_ASSIST_DEG, WEAPON_MUZZLE_OFFSET, WEAPON_COLLISION_RADIUS, BREAKABLE_CONFIG, quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { spawnParticles } from "./particles.js";
 import { pistolShot, bulletHit, zombieDeath } from "./sfx.js";
+import { damageBreakableAt } from "./obstacles.js";
+import { dropHealthPickup } from "./pickups.js";
 
 const MAX_BULLETS = 48;
 const BULLET_SPEED = 520;
@@ -61,7 +63,24 @@ function fire(player, viewWidth, viewHeight) {
   pistolShot();
 }
 
-export function updateWeapons(player, dt, viewWidth, viewHeight) {
+function explodeBarrel(barrel, player, onPlayerDamage, enemies) {
+  const { blastRadius, blastDamage } = BREAKABLE_CONFIG.barrel;
+  const radiusSquared = blastRadius * blastRadius;
+  for (let i = 0; i < enemies.length; i += 1) {
+    const enemy = enemies[i]; if (!enemy.active) continue;
+    const dx = enemy.x - barrel.x; const dy = enemy.y - barrel.y;
+    if (dx * dx + dy * dy > radiusSquared) continue;
+    if (damageEnemy(i, blastDamage)) {
+      zombieDeath(enemy.type);
+      if (killsCallback) killsCallback(enemy.x, enemy.y);
+    }
+  }
+  const dx = player.x - barrel.x; const dy = player.y - barrel.y;
+  if (dx * dx + dy * dy <= radiusSquared && onPlayerDamage) onPlayerDamage(blastDamage, barrel);
+  bulletHit();
+}
+
+export function updateWeapons(player, dt, viewWidth, viewHeight, onPlayerDamage = null) {
   visualTime += dt;
   player.firing = Math.max(0, player.firing - dt); player.recoil = Math.max(0, player.recoil - dt);
   fireClock -= dt;
@@ -72,6 +91,19 @@ export function updateWeapons(player, dt, viewWidth, viewHeight) {
     if (!bullet.active) continue;
     bullet.life -= dt;
     bullet.x += bullet.vx * dt; bullet.y += bullet.vy * dt;
+    const obstacle = damageBreakableAt(bullet.x, bullet.y, WEAPON_COLLISION_RADIUS);
+    if (obstacle) {
+      bulletHit();
+      if (obstacle.destroyed && obstacle.type === "crate" && !obstacle.pickupDropped) {
+        obstacle.pickupDropped = dropHealthPickup(obstacle.x, obstacle.y, BREAKABLE_CONFIG.crate.healthPickupAmount);
+      }
+      if (obstacle.destroyed && obstacle.type === "barrel" && !obstacle.blastApplied) {
+        obstacle.blastApplied = true;
+        explodeBarrel(obstacle, player, onPlayerDamage, enemies);
+      }
+      bullet.active = false;
+      continue;
+    }
     bulletX = bullet.x; bulletY = bullet.y; hitIndex = -1;
     forNearby(bullet.x, bullet.y, findBulletHit);
     if (hitIndex !== -1) {

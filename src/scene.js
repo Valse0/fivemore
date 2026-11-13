@@ -3,8 +3,10 @@ import { player, updatePlayer, damagePlayerFrom } from "./player.js";
 import { drawEnemies, drawSpits, getEnemyCount, getKillCount, getEnemies, getEnemyCountsByType, getSpitCount, debugSpawnEnemy, hasBossSpawned, isBossAlive, forNearby, resetEnemies, updateEnemies, updateCorpses } from "./enemies.js";
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
+import { drawHealthPickups, resetHealthPickups, updateHealthPickups } from "./pickups.js";
+import { getWorldObjectAt, resetWorldObjects, updateWorldObjectEffects } from "./obstacles.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
-import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, WEAPON_MUZZLE_OFFSET, ENEMY_ATTACK_ANIMATIONS, isInsideArena } from "./config.js";
+import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, WEAPON_MUZZLE_OFFSET, ENEMY_ATTACK_ANIMATIONS, BREAKABLE_CONFIG } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { drawParticles, updateParticles } from "./particles.js";
 import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
@@ -66,7 +68,6 @@ const debugFps = new URLSearchParams(location.search).get("debug") === "1";
 const fpsElement = document.querySelector("#fps-counter");
 let hitEnemy = null;
 let visualTime = 0;
-const worldObjectSprites = [sprites.crate, sprites.barrel, sprites.rock, sprites.tree, sprites.flowers];
 function takePlayerDamage(amount, source) {
   if (player.invulnerable > 0) return false;
   player.hp = Math.max(0, player.hp - amount); player.invulnerable = 0.5; damagePlayerFrom(source); playerHurt();
@@ -98,7 +99,7 @@ function resetRun() {
   deathVisualTime = 0;
   ambientClock = 0;
   runTime = 0; ended = false;
-  resetEnemies(); resetWeapons(); resetXP(); resetHUD();
+  resetEnemies(); resetWeapons(); resetXP(); resetHealthPickups(); resetWorldObjects(); resetHUD();
   previousTime = 0; accumulator = 0;
 }
 
@@ -113,11 +114,13 @@ function update(dt) {
   readMovement(movement);
   updatePlayer(movement, dt);
   updateEnemies(player, dt, runTime, width / WORLD_SCALE, height / WORLD_SCALE, takePlayerDamage);
+  updateWorldObjectEffects(dt);
   updateCorpses(dt);
   forNearby(player.x, player.y, takeContactDamage);
-  updateWeapons(player, dt, width / WORLD_SCALE, height / WORLD_SCALE);
+  updateWeapons(player, dt, width / WORLD_SCALE, height / WORLD_SCALE, takePlayerDamage);
   updateParticles(dt);
   if (updateXP(player, dt)) { player.hp = Math.min(100, player.hp + 10); levelFlash = 0.16; levelWave = 0; }
+  updateHealthPickups(player, dt);
   updateHUD(runTime, player.hp);
   if (player.hp <= 0 || (runTime >= 300 && hasBossSpawned() && !isBossAlive())) {
     ended = true;
@@ -161,12 +164,31 @@ function render() {
     const left = Math.floor((cameraX-viewWidth/2)/192); const right = Math.ceil((cameraX+viewWidth/2)/192);
     const top = Math.floor((cameraY-viewHeight/2)/192); const bottom = Math.ceil((cameraY+viewHeight/2)/192);
     for (let gy=top; gy<=bottom; gy+=1) for (let gx=left; gx<=right; gx+=1) {
-      const h=(gx*73856093 ^ gy*19349663)>>>0; if (h%7!==0) continue;
-      const sprite=worldObjectSprites[(h>>>4)%worldObjectSprites.length];
-      const frame=(h>>>8)%frameCount(sprite); const base=Number(sprite.dataset.frameSize); const size=snapWorldSize(base);
-      const objectX = gx * 192 + 96; const objectY = gy * 192 + 96;
-      if (!isInsideArena(objectX, objectY, base / 2)) continue;
-      drawFrame(context,sprite,frame,snapWorldPixel(objectX-size/2),snapWorldPixel(objectY-size/2),size,size,base);
+      const object = getWorldObjectAt(gx, gy); if (!object) continue;
+      const x = snapWorldPixel(object.x); const y = snapWorldPixel(object.y);
+      if (object.type === "barrel" && object.burnmark) {
+        const burnSize = snapWorldSize(BREAKABLE_CONFIG.barrel.burnmarkDrawSize);
+        drawFrame(context, sprites.barrelBurnmark, 0, snapWorldPixel(x - burnSize/2), snapWorldPixel(y - burnSize/2), burnSize, burnSize, 96);
+      }
+      if (object.destroyed && object.effectTimer > 0) {
+        const isBarrel = object.type === "barrel";
+        const effect = isBarrel ? BREAKABLE_CONFIG.barrel : BREAKABLE_CONFIG.crate;
+        const sprite = isBarrel ? sprites.barrelExplosion : sprites.crateBreak;
+        const duration = isBarrel ? effect.explosionDuration : effect.breakDuration;
+        const first = isBarrel ? effect.explodeFirstFrame : effect.breakFirstFrame;
+        const last = isBarrel ? effect.explodeLastFrame : effect.breakLastFrame;
+        const fps = isBarrel ? effect.explodeFps : effect.breakFps;
+        const frameSize = effect.frameSize; const drawSize = isBarrel ? effect.explosionDrawSize : effect.drawSize;
+        const elapsed = duration - object.effectTimer;
+        const frame = first + Math.min(last - first, Math.floor(elapsed * fps));
+        const size = snapWorldSize(drawSize);
+        drawFrame(context, sprite, frame, snapWorldPixel(x - size/2), snapWorldPixel(y - size/2), size, size, frameSize);
+      } else if (object.active) {
+        const sprite = sprites[object.type]; const base = Number(sprite.dataset.frameSize); const size = snapWorldSize(base);
+        const hash = (gx * 73856093 ^ gy * 19349663) >>> 0;
+        const frame = hash >>> 8;
+        drawFrame(context, sprite, frame % frameCount(sprite), snapWorldPixel(x - size/2), snapWorldPixel(y - size/2), size, size, base);
+      }
     }
   }
   context.save();
@@ -178,6 +200,7 @@ function render() {
   context.strokeRect(-ARENA_W / 2, -ARENA_H / 2, ARENA_W, ARENA_H);
   context.restore();
   drawGems(context, player, viewWidth, viewHeight, null);
+  drawHealthPickups(context, player, viewWidth, viewHeight);
   drawEnemies(context, runnerImage, player, viewWidth, viewHeight, tintedRunner);
   drawSpits(context, player, viewWidth, viewHeight);
   drawBullets(context, player, viewWidth, viewHeight);

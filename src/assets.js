@@ -18,6 +18,10 @@ const definitions = {
   muzzle: ["effects/muzzle_flash_spritesheet.png", 32, null], spark: ["effects/hit_spark_spritesheet.png", 32, null],
   gem: ["effects/xp_gems_spritesheet.png", 24, null], grass: ["world/grass_tiles_spritesheet.png", 32, null],
   crate: ["world/crate_spritesheet.png", 48, null], barrel: ["world/barrel_spritesheet.png", 48, null],
+  crateBreak: ["world/crate_break_spritesheet.png", 48, null],
+  barrelExplosion: ["effects/barrel_explosion_spritesheet.png", 96, null],
+  barrelBurnmark: ["effects/barrel_burnmark.png", 96, null],
+  pickupIcons: ["ui/pickup_icons.png", 32, null],
   rock: ["world/rock_spritesheet.png", 48, null], tree: ["world/tree_spritesheet.png", 96, null], flowers: ["world/flowers_spritesheet.png", 24, null],
 };
 export const sprites = {};
