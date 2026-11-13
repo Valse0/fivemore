@@ -152,6 +152,8 @@ h1 {
 .sub-screen h1 { font-size: clamp(40px, 10vw, 54px); }
 
 .settings-list { display: grid; margin-top: 32px; border-top: 1px solid var(--line); }
+.test-sound-button { margin-top: 18px; }
+.audio-debug { margin: 8px 0 0; color: var(--muted); font: 10px ui-monospace, monospace; }
 .setting-row {
   min-height: 84px;
   display: grid;

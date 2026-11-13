@@ -7,3 +7,4 @@
 - 2026-11-12: Added `report.md` with the setup summary, local run instructions, and phone checks.
 - 2026-11-13: Added a reusable heart button and support screen with configurable external links.
 - 2026-11-13: Added a quiet 30-second procedural menu loop controlled by the existing music and mute settings.
+- 2026-11-13: Fixed iPhone Safari menu audio startup, added a settings test tone and opt-in audio status.

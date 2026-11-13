@@ -1,4 +1,4 @@
-import { getAudioSettings, setAudioSetting, startAudioFromGesture } from "./audio.js";
+import { getAudioDebugStatus, getAudioSettings, playTestSound, setAudioSetting, startAudioFromGesture } from "./audio.js";
 import { SUPPORT_LINKS } from "./links.js";
 import { createHeartButton } from "./support.js";
 
@@ -8,6 +8,7 @@ const audioControls = {
   music: document.querySelector("#music-volume"),
   effects: document.querySelector("#sfx-volume"),
   muted: document.querySelector("#mute-audio"),
+  test: document.querySelector("#test-sound"),
 };
 
 function showScreen(screenId) {
@@ -33,7 +34,21 @@ document.querySelectorAll("[data-support-link]").forEach((link) => {
   link.href = SUPPORT_LINKS[link.dataset.supportLink];
 });
 
-document.addEventListener("pointerdown", startAudioFromGesture, { once: true, passive: true });
+for (const eventName of ["click", "touchend", "pointerup"]) {
+  document.addEventListener(eventName, startAudioFromGesture, { passive: true });
+}
+
+audioControls.test.addEventListener("click", playTestSound);
+
+const audioDebug = document.querySelector("#audio-debug");
+if (new URLSearchParams(location.search).has("debug")) {
+  audioDebug.hidden = false;
+  const updateAudioDebug = () => {
+    audioDebug.textContent = `Audio: ${getAudioDebugStatus()}`;
+  };
+  window.setInterval(updateAudioDebug, 500);
+  updateAudioDebug();
+}
 
 function updateVolumeControl(key, value) {
   const control = audioControls[key];

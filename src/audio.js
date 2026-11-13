@@ -7,6 +7,7 @@ let settings = readSettings();
 let context = null;
 let musicBus = null;
 let effectsBus = null;
+let silentAudio = null;
 
 function readSettings() {
   try {
@@ -33,9 +34,9 @@ function applyGains() {
   effectsBus.gain.value = (settings.effects / 100) * muteScale;
 }
 
-export function startAudioFromGesture() {
+function getContext() {
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContextClass) return;
+  if (!AudioContextClass) return null;
 
   if (!context) {
     context = new AudioContextClass();
@@ -46,8 +47,63 @@ export function startAudioFromGesture() {
     applyGains();
   }
 
-  if (context.state === "suspended") context.resume();
-  startMenuMusic(context, musicBus);
+  return context;
+}
+
+function enableIOSPlayback() {
+  if (silentAudio) return;
+  // A one-frame silent WAV switches iOS Safari's audio session to playback.
+  silentAudio = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=");
+  silentAudio.loop = true;
+  silentAudio.playsInline = true;
+  silentAudio.volume = 0.001;
+  const playback = silentAudio.play();
+  if (playback?.catch) playback.catch(() => { silentAudio = null; });
+}
+
+export async function startAudioFromGesture() {
+  const audioContext = getContext();
+  if (!audioContext) return;
+  enableIOSPlayback();
+
+  if (audioContext.state !== "running") {
+    try {
+      await audioContext.resume();
+    } catch {
+      return;
+    }
+  }
+  if (audioContext.state === "running") startMenuMusic(audioContext, musicBus);
+}
+
+export async function playTestSound() {
+  const audioContext = getContext();
+  if (!audioContext) return;
+  enableIOSPlayback();
+  if (audioContext.state !== "running") {
+    try {
+      await audioContext.resume();
+    } catch {
+      return;
+    }
+  }
+  if (audioContext.state !== "running") return;
+  const oscillator = audioContext.createOscillator();
+  const envelope = audioContext.createGain();
+  const now = audioContext.currentTime;
+  oscillator.type = "sine";
+  oscillator.frequency.value = 660;
+  envelope.gain.setValueAtTime(0.0001, now);
+  envelope.gain.exponentialRampToValueAtTime(0.35, now + 0.015);
+  envelope.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+  oscillator.connect(envelope);
+  envelope.connect(effectsBus);
+  oscillator.start(now);
+  oscillator.stop(now + 0.3);
+}
+
+export function getAudioDebugStatus() {
+  return `${context?.state ?? "not created"} · gain ${musicBus ? musicBus.gain.value.toFixed(2) : "0.00"}`;
 }
 
 export function getAudioSettings() {
