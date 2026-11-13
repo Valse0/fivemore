@@ -1,0 +1,418 @@
+{
+  "group": "B+C",
+  "category": "effects",
+  "name": "Combat & Level-Up Effects (Groups B & C)",
+  "style": "16-bit pixel art, 1px #0A090D outline, binary alpha, zero soft alpha gradients, no AA",
+  "assets": [
+    {
+      "id": "barrel_explosion",
+      "title": "Barrel Explosion (Group B)",
+      "file": "barrel_explosion_spritesheet.png",
+      "frameSize": {
+        "w": 96,
+        "h": 96
+      },
+      "frameCount": 7,
+      "sheetSize": {
+        "w": 672,
+        "h": 96
+      },
+      "paletteCount": 11,
+      "animations": {
+        "explode": [
+          0,
+          6
+        ]
+      },
+      "fps": 12,
+      "frameOrder": [
+        "0: swelling",
+        "1: flash_ignition",
+        "2: peak_explosion",
+        "3: expanding_blast",
+        "4: rising_fire_smoke",
+        "5: dispersing_smoke",
+        "6: fading_wisps"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "explode_0",
+          "x": 0,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 31,
+            "minY": 25,
+            "maxX": 64,
+            "maxY": 72,
+            "width": 34,
+            "height": 48
+          }
+        },
+        {
+          "index": 1,
+          "name": "explode_1",
+          "x": 96,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 14,
+            "minY": 16,
+            "maxX": 81,
+            "maxY": 83,
+            "width": 68,
+            "height": 68
+          }
+        },
+        {
+          "index": 2,
+          "name": "explode_2",
+          "x": 192,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 9,
+            "minY": 5,
+            "maxX": 87,
+            "maxY": 81,
+            "width": 79,
+            "height": 77
+          }
+        },
+        {
+          "index": 3,
+          "name": "explode_3",
+          "x": 288,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 4,
+            "minY": 2,
+            "maxX": 92,
+            "maxY": 84,
+            "width": 89,
+            "height": 83
+          }
+        },
+        {
+          "index": 4,
+          "name": "explode_4",
+          "x": 384,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 7,
+            "minY": 2,
+            "maxX": 89,
+            "maxY": 74,
+            "width": 83,
+            "height": 73
+          }
+        },
+        {
+          "index": 5,
+          "name": "explode_5",
+          "x": 480,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 9,
+            "minY": 4,
+            "maxX": 87,
+            "maxY": 66,
+            "width": 79,
+            "height": 63
+          }
+        },
+        {
+          "index": 6,
+          "name": "explode_6",
+          "x": 576,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 18,
+            "minY": 9,
+            "maxX": 77,
+            "maxY": 57,
+            "width": 60,
+            "height": 49
+          }
+        }
+      ]
+    },
+    {
+      "id": "barrel_burnmark",
+      "title": "Barrel Burn Mark (Group B)",
+      "file": "barrel_burnmark.png",
+      "frameSize": {
+        "w": 96,
+        "h": 96
+      },
+      "frameCount": 1,
+      "sheetSize": {
+        "w": 96,
+        "h": 96
+      },
+      "paletteCount": 6,
+      "animations": {
+        "idle": [
+          0,
+          0
+        ]
+      },
+      "fps": 1,
+      "frameOrder": [
+        "0: scorched_crater"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "burnmark_0",
+          "x": 0,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 9,
+            "minY": 25,
+            "maxX": 86,
+            "maxY": 73,
+            "width": 78,
+            "height": 49
+          }
+        }
+      ]
+    },
+    {
+      "id": "acid_splat",
+      "title": "Acid Spit Ground Splat (Group B)",
+      "file": "acid_splat_spritesheet.png",
+      "frameSize": {
+        "w": 32,
+        "h": 32
+      },
+      "frameCount": 4,
+      "sheetSize": {
+        "w": 128,
+        "h": 32
+      },
+      "paletteCount": 5,
+      "animations": {
+        "splat": [
+          0,
+          3
+        ]
+      },
+      "fps": 10,
+      "frameOrder": [
+        "0: impact_splash",
+        "1: expanding_puddle",
+        "2: bubbling_pool",
+        "3: settling_ring"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "splat_0",
+          "x": 0,
+          "y": 0,
+          "w": 32,
+          "h": 32,
+          "bounds": {
+            "minX": 7,
+            "minY": 5,
+            "maxX": 25,
+            "maxY": 24,
+            "width": 19,
+            "height": 20
+          }
+        },
+        {
+          "index": 1,
+          "name": "splat_1",
+          "x": 32,
+          "y": 0,
+          "w": 32,
+          "h": 32,
+          "bounds": {
+            "minX": 3,
+            "minY": 10,
+            "maxX": 29,
+            "maxY": 26,
+            "width": 27,
+            "height": 17
+          }
+        },
+        {
+          "index": 2,
+          "name": "splat_2",
+          "x": 64,
+          "y": 0,
+          "w": 32,
+          "h": 32,
+          "bounds": {
+            "minX": 2,
+            "minY": 10,
+            "maxX": 30,
+            "maxY": 26,
+            "width": 29,
+            "height": 17
+          }
+        },
+        {
+          "index": 3,
+          "name": "splat_3",
+          "x": 96,
+          "y": 0,
+          "w": 32,
+          "h": 32,
+          "bounds": {
+            "minX": 4,
+            "minY": 11,
+            "maxX": 28,
+            "maxY": 25,
+            "width": 25,
+            "height": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "levelup_ring",
+      "title": "Level-Up Golden Ring (Group C)",
+      "file": "levelup_ring_spritesheet.png",
+      "frameSize": {
+        "w": 96,
+        "h": 96
+      },
+      "frameCount": 6,
+      "sheetSize": {
+        "w": 576,
+        "h": 96
+      },
+      "paletteCount": 5,
+      "animations": {
+        "expand": [
+          0,
+          5
+        ]
+      },
+      "fps": 12,
+      "frameOrder": [
+        "0: core_burst",
+        "1: inner_ring",
+        "2: mid_ring",
+        "3: wide_ring",
+        "4: outer_pulse",
+        "5: sparkle_fade"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "expand_0",
+          "x": 0,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 33,
+            "minY": 32,
+            "maxX": 65,
+            "maxY": 57,
+            "width": 33,
+            "height": 26
+          }
+        },
+        {
+          "index": 1,
+          "name": "expand_1",
+          "x": 96,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 24,
+            "minY": 27,
+            "maxX": 70,
+            "maxY": 71,
+            "width": 47,
+            "height": 45
+          }
+        },
+        {
+          "index": 2,
+          "name": "expand_2",
+          "x": 192,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 18,
+            "minY": 20,
+            "maxX": 76,
+            "maxY": 67,
+            "width": 59,
+            "height": 48
+          }
+        },
+        {
+          "index": 3,
+          "name": "expand_3",
+          "x": 288,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 14,
+            "minY": 17,
+            "maxX": 84,
+            "maxY": 80,
+            "width": 71,
+            "height": 64
+          }
+        },
+        {
+          "index": 4,
+          "name": "expand_4",
+          "x": 384,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 8,
+            "minY": 11,
+            "maxX": 88,
+            "maxY": 76,
+            "width": 81,
+            "height": 66
+          }
+        },
+        {
+          "index": 5,
+          "name": "expand_5",
+          "x": 480,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 4,
+            "minY": 11,
+            "maxX": 92,
+            "maxY": 86,
+            "width": 89,
+            "height": 76
+          }
+        }
+      ]
+    }
+  ]
+}

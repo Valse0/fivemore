@@ -1,0 +1,650 @@
+{
+  "group": "A",
+  "name": "Zombie Attack Sprite Sheets (Group A)",
+  "style": "16-bit pixel art, 1px #0A090D outline, 8-10 flat colors, top-left lighting, facing right, binary alpha, no embedded shadow, no AA, no gradients",
+  "assets": [
+    {
+      "id": "walker_attack",
+      "title": "Walker Attack",
+      "file": "walker_attack_spritesheet.png",
+      "frameSize": {
+        "w": 64,
+        "h": 64
+      },
+      "frameCount": 4,
+      "sheetSize": {
+        "w": 256,
+        "h": 64
+      },
+      "footBaselineY": 58,
+      "paletteCount": 9,
+      "animations": {
+        "attack": [
+          0,
+          3
+        ]
+      },
+      "fps": 9,
+      "frameOrder": [
+        "0: windup",
+        "1: lunge",
+        "2: slash_peak",
+        "3: recover"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "attack_0",
+          "x": 0,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 12,
+            "minY": 12,
+            "maxX": 43,
+            "maxY": 58,
+            "width": 32,
+            "height": 47
+          }
+        },
+        {
+          "index": 1,
+          "name": "attack_1",
+          "x": 64,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 17,
+            "minY": 13,
+            "maxX": 52,
+            "maxY": 58,
+            "width": 36,
+            "height": 46
+          }
+        },
+        {
+          "index": 2,
+          "name": "attack_2",
+          "x": 128,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 19,
+            "minY": 15,
+            "maxX": 56,
+            "maxY": 58,
+            "width": 38,
+            "height": 44
+          }
+        },
+        {
+          "index": 3,
+          "name": "attack_3",
+          "x": 192,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 16,
+            "minY": 13,
+            "maxX": 45,
+            "maxY": 58,
+            "width": 30,
+            "height": 46
+          }
+        }
+      ]
+    },
+    {
+      "id": "runner_attack",
+      "title": "Runner Attack",
+      "file": "runner_attack_spritesheet.png",
+      "frameSize": {
+        "w": 64,
+        "h": 64
+      },
+      "frameCount": 4,
+      "sheetSize": {
+        "w": 256,
+        "h": 64
+      },
+      "footBaselineY": 58,
+      "paletteCount": 10,
+      "animations": {
+        "attack": [
+          0,
+          3
+        ]
+      },
+      "fps": 11,
+      "frameOrder": [
+        "0: crouch_windup",
+        "1: pounce_lunge",
+        "2: double_claw_strike",
+        "3: recover"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "attack_0",
+          "x": 0,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 18,
+            "minY": 32,
+            "maxX": 39,
+            "maxY": 58,
+            "width": 22,
+            "height": 27
+          }
+        },
+        {
+          "index": 1,
+          "name": "attack_1",
+          "x": 64,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 21,
+            "minY": 30,
+            "maxX": 47,
+            "maxY": 58,
+            "width": 27,
+            "height": 29
+          }
+        },
+        {
+          "index": 2,
+          "name": "attack_2",
+          "x": 128,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 23,
+            "minY": 31,
+            "maxX": 49,
+            "maxY": 58,
+            "width": 27,
+            "height": 28
+          }
+        },
+        {
+          "index": 3,
+          "name": "attack_3",
+          "x": 192,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 22,
+            "minY": 30,
+            "maxX": 41,
+            "maxY": 58,
+            "width": 20,
+            "height": 29
+          }
+        }
+      ]
+    },
+    {
+      "id": "spitter_attack",
+      "title": "Spitter Attack (Acid Spit)",
+      "file": "spitter_attack_spritesheet.png",
+      "frameSize": {
+        "w": 64,
+        "h": 64
+      },
+      "frameCount": 4,
+      "sheetSize": {
+        "w": 256,
+        "h": 64
+      },
+      "footBaselineY": 58,
+      "paletteCount": 10,
+      "animations": {
+        "attack": [
+          0,
+          3
+        ]
+      },
+      "fps": 8,
+      "frameOrder": [
+        "0: acid_charge",
+        "1: jaw_open",
+        "2: acid_spit_launch",
+        "3: recover"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "attack_0",
+          "x": 0,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 16,
+            "minY": 25,
+            "maxX": 35,
+            "maxY": 58,
+            "width": 20,
+            "height": 34
+          }
+        },
+        {
+          "index": 1,
+          "name": "attack_1",
+          "x": 64,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 20,
+            "minY": 25,
+            "maxX": 40,
+            "maxY": 58,
+            "width": 21,
+            "height": 34
+          }
+        },
+        {
+          "index": 2,
+          "name": "attack_2",
+          "x": 128,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 22,
+            "minY": 25,
+            "maxX": 50,
+            "maxY": 58,
+            "width": 29,
+            "height": 34
+          }
+        },
+        {
+          "index": 3,
+          "name": "attack_3",
+          "x": 192,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 21,
+            "minY": 25,
+            "maxX": 42,
+            "maxY": 58,
+            "width": 22,
+            "height": 34
+          }
+        }
+      ]
+    },
+    {
+      "id": "tank_attack",
+      "title": "Tank Attack (Arm Swing / Ground Slam)",
+      "file": "tank_attack_spritesheet.png",
+      "frameSize": {
+        "w": 96,
+        "h": 96
+      },
+      "frameCount": 4,
+      "sheetSize": {
+        "w": 384,
+        "h": 96
+      },
+      "footBaselineY": 88,
+      "paletteCount": 10,
+      "animations": {
+        "attack": [
+          0,
+          3
+        ]
+      },
+      "fps": 7,
+      "frameOrder": [
+        "0: overhead_windup",
+        "1: heavy_swing_down",
+        "2: ground_slam_impact",
+        "3: heavy_recoil"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "attack_0",
+          "x": 0,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 21,
+            "minY": 6,
+            "maxX": 69,
+            "maxY": 88,
+            "width": 49,
+            "height": 83
+          }
+        },
+        {
+          "index": 1,
+          "name": "attack_1",
+          "x": 96,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 25,
+            "minY": 18,
+            "maxX": 87,
+            "maxY": 88,
+            "width": 63,
+            "height": 71
+          }
+        },
+        {
+          "index": 2,
+          "name": "attack_2",
+          "x": 192,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 27,
+            "minY": 22,
+            "maxX": 82,
+            "maxY": 88,
+            "width": 56,
+            "height": 67
+          }
+        },
+        {
+          "index": 3,
+          "name": "attack_3",
+          "x": 288,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 23,
+            "minY": 15,
+            "maxX": 71,
+            "maxY": 88,
+            "width": 49,
+            "height": 74
+          }
+        }
+      ]
+    },
+    {
+      "id": "boss_attack",
+      "title": "Boss Attack (Roar + Ground Slam)",
+      "file": "boss_attack_spritesheet.png",
+      "frameSize": {
+        "w": 128,
+        "h": 128
+      },
+      "frameCount": 4,
+      "sheetSize": {
+        "w": 512,
+        "h": 128
+      },
+      "footBaselineY": 118,
+      "paletteCount": 11,
+      "animations": {
+        "attack": [
+          0,
+          3
+        ]
+      },
+      "fps": 6,
+      "frameOrder": [
+        "0: roaring_windup",
+        "1: downward_crush",
+        "2: ground_smash_impact",
+        "3: follow_through"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "attack_0",
+          "x": 0,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "bounds": {
+            "minX": 21,
+            "minY": 23,
+            "maxX": 101,
+            "maxY": 118,
+            "width": 81,
+            "height": 96
+          }
+        },
+        {
+          "index": 1,
+          "name": "attack_1",
+          "x": 128,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "bounds": {
+            "minX": 27,
+            "minY": 32,
+            "maxX": 121,
+            "maxY": 118,
+            "width": 95,
+            "height": 87
+          }
+        },
+        {
+          "index": 2,
+          "name": "attack_2",
+          "x": 256,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "bounds": {
+            "minX": 29,
+            "minY": 38,
+            "maxX": 118,
+            "maxY": 118,
+            "width": 90,
+            "height": 81
+          }
+        },
+        {
+          "index": 3,
+          "name": "attack_3",
+          "x": 384,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "bounds": {
+            "minX": 26,
+            "minY": 31,
+            "maxX": 102,
+            "maxY": 118,
+            "width": 77,
+            "height": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "boss_exact_animated",
+      "title": "Boss Mutant Brute (96×96 Exact Reference Animated)",
+      "file": "boss_exact_animated_spritesheet.png",
+      "frameSize": {
+        "w": 96,
+        "h": 96
+      },
+      "frameCount": 8,
+      "sheetSize": {
+        "w": 768,
+        "h": 96
+      },
+      "footBaselineY": 78,
+      "facing": "left (matches exact reference artwork; mirror horizontally in-engine for right)",
+      "paletteCount": 19,
+      "animations": {
+        "idle_walk": [
+          0,
+          3
+        ],
+        "attack": [
+          4,
+          7
+        ]
+      },
+      "fps": 7,
+      "frameOrder": [
+        "0: idle_ref_exact",
+        "1: heavy_walk_stride_a",
+        "2: heavy_breath_peak",
+        "3: heavy_walk_stride_b",
+        "4: roar_windup",
+        "5: downward_crush",
+        "6: ground_slam_impact",
+        "7: recover"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "idle_walk_0",
+          "x": 0,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 10,
+            "minY": 17,
+            "maxX": 85,
+            "maxY": 78,
+            "width": 76,
+            "height": 62
+          }
+        },
+        {
+          "index": 1,
+          "name": "idle_walk_1",
+          "x": 96,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 8,
+            "minY": 17,
+            "maxX": 87,
+            "maxY": 80,
+            "width": 80,
+            "height": 64
+          }
+        },
+        {
+          "index": 2,
+          "name": "idle_walk_2",
+          "x": 192,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 10,
+            "minY": 15,
+            "maxX": 85,
+            "maxY": 79,
+            "width": 76,
+            "height": 65
+          }
+        },
+        {
+          "index": 3,
+          "name": "idle_walk_3",
+          "x": 288,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 11,
+            "minY": 17,
+            "maxX": 84,
+            "maxY": 80,
+            "width": 74,
+            "height": 64
+          }
+        },
+        {
+          "index": 4,
+          "name": "attack_0",
+          "x": 384,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 7,
+            "minY": 14,
+            "maxX": 88,
+            "maxY": 79,
+            "width": 82,
+            "height": 66
+          }
+        },
+        {
+          "index": 5,
+          "name": "attack_1",
+          "x": 480,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 5,
+            "minY": 17,
+            "maxX": 82,
+            "maxY": 80,
+            "width": 78,
+            "height": 64
+          }
+        },
+        {
+          "index": 6,
+          "name": "attack_2",
+          "x": 576,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 6,
+            "minY": 19,
+            "maxX": 83,
+            "maxY": 82,
+            "width": 78,
+            "height": 64
+          }
+        },
+        {
+          "index": 7,
+          "name": "attack_3",
+          "x": 672,
+          "y": 0,
+          "w": 96,
+          "h": 96,
+          "bounds": {
+            "minX": 8,
+            "minY": 17,
+            "maxX": 86,
+            "maxY": 80,
+            "width": 79,
+            "height": 64
+          }
+        }
+      ]
+    }
+  ]
+}

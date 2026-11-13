@@ -1,0 +1,112 @@
+{
+  "group": "C",
+  "category": "characters",
+  "name": "Survivor Shoot & Pistol Sprite (Group C)",
+  "style": "16-bit pixel art matching survivor_refined, 1px #0A090D outline, facing right, binary alpha, no embedded shadow",
+  "assets": [
+    {
+      "id": "survivor_shoot",
+      "title": "Survivor Shoot (Aim + Recoil)",
+      "file": "survivor_shoot_spritesheet.png",
+      "frameSize": {
+        "w": 64,
+        "h": 64
+      },
+      "frameCount": 2,
+      "sheetSize": {
+        "w": 128,
+        "h": 64
+      },
+      "footBaselineY": 58,
+      "paletteCount": 11,
+      "animations": {
+        "shoot": [
+          0,
+          1
+        ]
+      },
+      "fps": 10,
+      "frameOrder": [
+        "0: firing_pose",
+        "1: recoil_pose"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "shoot_0",
+          "x": 0,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 23,
+            "minY": 24,
+            "maxX": 46,
+            "maxY": 58,
+            "width": 24,
+            "height": 35
+          }
+        },
+        {
+          "index": 1,
+          "name": "shoot_1",
+          "x": 64,
+          "y": 0,
+          "w": 64,
+          "h": 64,
+          "bounds": {
+            "minX": 21,
+            "minY": 25,
+            "maxX": 43,
+            "maxY": 58,
+            "width": 23,
+            "height": 34
+          }
+        }
+      ]
+    },
+    {
+      "id": "pistol",
+      "title": "Pistol Sprite (Aim-Rotatable)",
+      "file": "pistol_sprite.png",
+      "frameSize": {
+        "w": 24,
+        "h": 16
+      },
+      "frameCount": 1,
+      "sheetSize": {
+        "w": 24,
+        "h": 16
+      },
+      "paletteCount": 6,
+      "animations": {
+        "idle": [
+          0,
+          0
+        ]
+      },
+      "fps": 1,
+      "frameOrder": [
+        "0: pistol_right"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "pistol_0",
+          "x": 0,
+          "y": 0,
+          "w": 24,
+          "h": 16,
+          "bounds": {
+            "minX": 2,
+            "minY": 3,
+            "maxX": 21,
+            "maxY": 12,
+            "width": 20,
+            "height": 10
+          }
+        }
+      ]
+    }
+  ]
+}

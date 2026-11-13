@@ -1,0 +1,119 @@
+{
+  "group": "B",
+  "category": "world",
+  "name": "World Props Destruction (Group B)",
+  "style": "16-bit pixel art, 1px #0A090D outline, flat palette, binary alpha, no AA, no gradients",
+  "assets": [
+    {
+      "id": "crate_break",
+      "title": "Wooden Crate Break",
+      "file": "crate_break_spritesheet.png",
+      "frameSize": {
+        "w": 48,
+        "h": 48
+      },
+      "frameCount": 5,
+      "sheetSize": {
+        "w": 240,
+        "h": 48
+      },
+      "paletteCount": 6,
+      "animations": {
+        "break": [
+          0,
+          4
+        ]
+      },
+      "fps": 10,
+      "frameOrder": [
+        "0: cracking",
+        "1: breaking_apart",
+        "2: splinters_falling",
+        "3: impact_shards",
+        "4: small_debris_remnant"
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "name": "break_0",
+          "x": 0,
+          "y": 0,
+          "w": 48,
+          "h": 48,
+          "bounds": {
+            "minX": 7,
+            "minY": 2,
+            "maxX": 41,
+            "maxY": 40,
+            "width": 35,
+            "height": 39
+          }
+        },
+        {
+          "index": 1,
+          "name": "break_1",
+          "x": 48,
+          "y": 0,
+          "w": 48,
+          "h": 48,
+          "bounds": {
+            "minX": 3,
+            "minY": 5,
+            "maxX": 43,
+            "maxY": 40,
+            "width": 41,
+            "height": 36
+          }
+        },
+        {
+          "index": 2,
+          "name": "break_2",
+          "x": 96,
+          "y": 0,
+          "w": 48,
+          "h": 48,
+          "bounds": {
+            "minX": 2,
+            "minY": 9,
+            "maxX": 45,
+            "maxY": 36,
+            "width": 44,
+            "height": 28
+          }
+        },
+        {
+          "index": 3,
+          "name": "break_3",
+          "x": 144,
+          "y": 0,
+          "w": 48,
+          "h": 48,
+          "bounds": {
+            "minX": 4,
+            "minY": 25,
+            "maxX": 43,
+            "maxY": 41,
+            "width": 40,
+            "height": 17
+          }
+        },
+        {
+          "index": 4,
+          "name": "break_4",
+          "x": 192,
+          "y": 0,
+          "w": 48,
+          "h": 48,
+          "bounds": {
+            "minX": 10,
+            "minY": 33,
+            "maxX": 37,
+            "maxY": 42,
+            "width": 28,
+            "height": 10
+          }
+        }
+      ]
+    }
+  ]
+}
