@@ -46,6 +46,7 @@ let fpsFrames = 0; let fpsTime = 0; let fps = 0;
 const debugFps = new URLSearchParams(location.search).get("debug") === "1";
 const fpsElement = document.querySelector("#fps-counter");
 let hitEnemy = null;
+let visualTime = 0;
 function takeContactDamage(enemy) {
   if (player.invulnerable > 0 || !enemy.active) return;
   const dx = player.x - enemy.x; const dy = player.y - enemy.y;
@@ -74,6 +75,7 @@ function resetRun() {
 }
 
 function update(dt) {
+  visualTime += dt;
   runTime += dt;
   updateGameplayMusicTime(runTime);
   ambientClock -= dt;
@@ -145,7 +147,15 @@ function render() {
     context.globalAlpha = 1 - levelWave / 0.65; context.strokeStyle = "#fff4c7"; context.lineWidth = 2 / WORLD_SCALE;
     context.beginPath(); context.arc(0, 0, 24 + levelWave * 190, 0, Math.PI * 2); context.stroke(); context.globalAlpha = 1;
   }
-  if (playerImage.complete && playerImage.naturalWidth) {
+  if (USE_V2_ASSETS) {
+    const sprite = sprites.survivor; const size = snapWorldSize(DRAW_SIZES.survivor); const count = frameCount(sprite);
+    const hurtFrame = Math.max(0, count - 2); const walkFrames = Math.max(1, count - 2);
+    const frame = player.invulnerable > 0 ? hurtFrame : Math.floor(visualTime * (movement.x || movement.y ? 9 : 3)) % walkFrames;
+    if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
+    context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y));
+    if (Math.cos(player.angle) < 0) context.scale(-1, 1);
+    drawFrame(context, sprite, frame, -size / 2, -size / 2, size, size); context.restore(); context.globalAlpha = 1;
+  } else if (playerImage.complete && playerImage.naturalWidth) {
     if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
     context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y - Math.sin(player.angle) * (player.recoil > 0 ? 2 : 0)));
     context.rotate(quantizeDirection(player.angle));
