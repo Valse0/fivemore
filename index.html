@@ -78,8 +78,27 @@
 
       <section class="screen game-screen" id="game" aria-label="Game scene" hidden>
         <canvas id="game-canvas" aria-label="Move with the floating joystick"></canvas>
+        <div class="game-hud" aria-live="polite">
+          <div class="hud-bars">
+            <div class="hud-meter hp-meter"><span id="hp-label">100 HP</span><span class="meter-track"><i id="hp-fill"></i></span></div>
+            <div class="hud-meter xp-meter"><span id="level-label">LV 1</span><span class="meter-track"><i id="xp-fill"></i></span></div>
+          </div>
+          <span class="run-timer" id="run-timer">0:00</span>
+        </div>
+        <div class="level-toast" id="level-toast" hidden>LEVEL UP</div>
         <button class="pause-button" id="pause-game" type="button" aria-label="Pause and return to menu">Ⅱ</button>
         <span class="fps-counter" id="fps-counter" hidden></span>
+        <section class="run-end" id="run-end" aria-labelledby="run-end-heading" hidden>
+          <div class="run-end-panel">
+            <div class="run-end-support" id="support-heart-slot-game"></div>
+            <h1 id="run-end-heading">Run over</h1>
+            <p id="run-end-stats"></p>
+            <div class="run-end-actions">
+              <button class="menu-button menu-button-primary" type="button" data-screen="game">Try again</button>
+              <button class="menu-button" type="button" data-screen="home">Menu</button>
+            </div>
+          </div>
+        </section>
         <div class="virtual-stick" id="virtual-stick" aria-hidden="true">
           <span class="virtual-stick-knob"></span>
         </div>

@@ -33,9 +33,9 @@ navigationButtons.forEach((button) => {
 
 initializeGame();
 
-document.querySelector("#support-heart-slot").append(
-  createHeartButton({ onClick: () => showScreen("support") }),
-);
+document.querySelectorAll("#support-heart-slot, #support-heart-slot-game").forEach((slot) => {
+  slot.append(createHeartButton({ onClick: () => showScreen("support") }));
+});
 document.querySelectorAll("[data-support-link]").forEach((link) => {
   link.href = SUPPORT_LINKS[link.dataset.supportLink];
 });

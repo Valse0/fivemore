@@ -1,5 +1,9 @@
 import { initializeInput, readMovement, showInput } from "./input.js";
 import { player, updatePlayer } from "./player.js";
+import { drawEnemies, getEnemyCount, getKillCount, forNearby, resetEnemies, updateEnemies } from "./enemies.js";
+import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
+import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
+import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
 
 const TILE_SIZE = 64;
 const STEP = 1 / 60;
@@ -8,60 +12,87 @@ const movement = { x: 0, y: 0 };
 const canvas = document.querySelector("#game-canvas");
 const context = canvas.getContext("2d", { alpha: false });
 const playerImage = new Image();
+const runnerImage = new Image();
 const groundImage = new Image();
 playerImage.src = "assets/graphs/kenney/PNG/Survivor%201/survivor1_gun.png";
+runnerImage.src = "assets/graphs/kenney/PNG/Zombie%201/zoimbie1_stand.png";
 groundImage.src = "assets/graphs/kenney/PNG/Tiles/tile_05.png";
-let width = 0;
-let height = 0;
-let pixelRatio = 1;
-let active = false;
-let initialized = false;
-let previousTime = 0;
-let accumulator = 0;
-let fpsFrames = 0;
-let fpsTime = 0;
-let fps = 0;
+let tintedRunner = null;
+runnerImage.addEventListener("load", () => {
+  tintedRunner = document.createElement("canvas");
+  tintedRunner.width = runnerImage.naturalWidth; tintedRunner.height = runnerImage.naturalHeight;
+  const tintContext = tintedRunner.getContext("2d");
+  tintContext.drawImage(runnerImage, 0, 0);
+  tintContext.globalCompositeOperation = "source-atop";
+  tintContext.fillStyle = "rgba(126, 226, 154, .52)";
+  tintContext.fillRect(0, 0, tintedRunner.width, tintedRunner.height);
+});
+let width = 0; let height = 0; let pixelRatio = 1;
+let active = false; let initialized = false; let ended = false;
+let previousTime = 0; let accumulator = 0; let runTime = 0;
+let fpsFrames = 0; let fpsTime = 0; let fps = 0;
 const debugFps = new URLSearchParams(location.search).get("debug") === "1";
 const fpsElement = document.querySelector("#fps-counter");
+let hitEnemy = null;
+function takeContactDamage(enemy) {
+  if (player.invulnerable > 0 || !enemy.active) return;
+  const dx = player.x - enemy.x; const dy = player.y - enemy.y;
+  const radius = enemy.radius + 18;
+  if (dx * dx + dy * dy <= radius * radius) {
+    player.hp = Math.max(0, player.hp - 12); player.invulnerable = 0.5;
+  }
+}
 
 function resize() {
   const rect = canvas.getBoundingClientRect();
-  width = rect.width;
-  height = rect.height;
+  width = rect.width; height = rect.height;
   pixelRatio = Math.max(1, Math.floor(window.devicePixelRatio || 1));
-  canvas.width = Math.round(width * pixelRatio);
-  canvas.height = Math.round(height * pixelRatio);
+  canvas.width = Math.round(width * pixelRatio); canvas.height = Math.round(height * pixelRatio);
   context.imageSmoothingEnabled = false;
 }
 
-function update() {
+function resetRun() {
+  player.x = 0; player.y = 0; player.angle = -Math.PI / 2; player.hp = 100; player.invulnerable = 0;
+  runTime = 0; ended = false;
+  resetEnemies(); resetWeapons(); resetXP(); resetHUD();
+  previousTime = 0; accumulator = 0;
+}
+
+function update(dt) {
+  runTime += dt;
+  player.invulnerable = Math.max(0, player.invulnerable - dt);
   readMovement(movement);
-  updatePlayer(movement, STEP);
+  updatePlayer(movement, dt);
+  updateEnemies(player, dt, runTime, width, height);
+  forNearby(player.x, player.y, takeContactDamage);
+  updateWeapons(player, dt);
+  updateXP(player, dt);
+  updateHUD(runTime, player.hp);
+  if (player.hp <= 0 || runTime >= 300) {
+    ended = true;
+    showRunEnd(runTime >= 300, runTime, getKillCount());
+    active = false; showInput(false);
+  }
 }
 
 function render() {
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-  context.fillStyle = "#765b3c";
-  context.fillRect(0, 0, width, height);
+  context.fillStyle = "#765b3c"; context.fillRect(0, 0, width, height);
   if (groundImage.complete && groundImage.naturalWidth) {
-    const cameraLeft = player.x - width / 2;
-    const cameraTop = player.y - height / 2;
-    const firstTileX = Math.floor(cameraLeft / TILE_SIZE);
-    const firstTileY = Math.floor(cameraTop / TILE_SIZE);
-    const offsetX = -(cameraLeft - firstTileX * TILE_SIZE);
-    const offsetY = -(cameraTop - firstTileY * TILE_SIZE);
-    for (let y = offsetY - TILE_SIZE; y < height + TILE_SIZE; y += TILE_SIZE) {
-      for (let x = offsetX - TILE_SIZE; x < width + TILE_SIZE; x += TILE_SIZE) {
+    const cameraLeft = player.x - width / 2; const cameraTop = player.y - height / 2;
+    const firstTileX = Math.floor(cameraLeft / TILE_SIZE); const firstTileY = Math.floor(cameraTop / TILE_SIZE);
+    const offsetX = -(cameraLeft - firstTileX * TILE_SIZE); const offsetY = -(cameraTop - firstTileY * TILE_SIZE);
+    for (let y = offsetY - TILE_SIZE; y < height + TILE_SIZE; y += TILE_SIZE)
+      for (let x = offsetX - TILE_SIZE; x < width + TILE_SIZE; x += TILE_SIZE)
         context.drawImage(groundImage, Math.round(x), Math.round(y), TILE_SIZE, TILE_SIZE);
-      }
-    }
   }
+  drawGems(context, player, width, height, null);
+  drawEnemies(context, runnerImage, player, width, height, tintedRunner);
+  drawBullets(context, player, width, height);
   if (playerImage.complete && playerImage.naturalWidth) {
-    context.save();
-    context.translate(Math.round(width / 2), Math.round(height / 2));
-    context.rotate(player.angle);
-    context.drawImage(playerImage, -32, -32, 64, 64);
-    context.restore();
+    if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
+    context.save(); context.translate(Math.round(width / 2), Math.round(height / 2));
+    context.rotate(player.angle); context.drawImage(playerImage, -32, -32, 64, 64); context.restore(); context.globalAlpha = 1;
   }
 }
 
@@ -69,22 +100,15 @@ function frame(timestamp) {
   requestAnimationFrame(frame);
   if (!active) return;
   if (!previousTime) previousTime = timestamp;
-  const delta = Math.min(MAX_FRAME, (timestamp - previousTime) / 1000);
-  previousTime = timestamp;
-  accumulator += delta;
-  while (accumulator >= STEP) {
-    update();
-    accumulator -= STEP;
-  }
+  const delta = Math.min(MAX_FRAME, (timestamp - previousTime) / 1000); previousTime = timestamp; accumulator += delta;
+  while (accumulator >= STEP && active) { update(STEP); accumulator -= STEP; }
   render();
   if (debugFps) {
-    fpsFrames += 1;
-    fpsTime += delta;
+    fpsFrames += 1; fpsTime += delta;
     if (fpsTime >= 0.5) {
       fps = Math.round(fpsFrames / fpsTime);
-      fpsElement.textContent = `${fps} FPS`;
-      fpsFrames = 0;
-      fpsTime = 0;
+      fpsElement.textContent = `${fps} FPS · ${getEnemyCount()} enemies · ${getBulletCount()} bullets`;
+      fpsFrames = 0; fpsTime = 0;
     }
   }
 }
@@ -92,18 +116,18 @@ function frame(timestamp) {
 export function initializeGame() {
   if (initialized) return;
   initialized = true;
+  setGemDropCallback(dropGem);
   initializeInput(canvas, document.querySelector("#virtual-stick"));
-  window.addEventListener("resize", resize);
-  resize();
+  window.addEventListener("resize", resize); resize();
   fpsElement.hidden = !debugFps;
+  document.querySelector("#pause-game").addEventListener("click", () => document.querySelector('[data-screen="home"]').click());
   requestAnimationFrame(frame);
 }
 
 export function setGameActive(value) {
-  active = Boolean(value);
+  const next = Boolean(value);
+  if (next && !active) resetRun();
+  active = next;
   showInput(active);
-  if (active) {
-    resize();
-    previousTime = 0;
-  }
+  if (active) { resize(); previousTime = 0; }
 }

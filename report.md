@@ -1,75 +1,64 @@
-# FIVEMORE menu and movement report
+# Combat core report — 2026-11-13
 
 ## Summary
 
-Completed all three parts in separate commits:
+Part A reworks the procedural soundtrack to a 104 BPM, 28-bar (about 64.6 s) synthwave loop in A minor, with Am–F–C–G bass, kick/snare/hat rhythm, a bar 9 motif, and bar 17 pad. The existing start/stop, volume, gesture gate, fade, and mute wiring remain in place.
 
-- Part A (`3f6f3b4`): tightened main-menu spacing while leaving the heart button, colors, copy, and sprites in place.
-- Part B (`55f1412`): replaced the short melody with a layered procedural D minor survival theme. The 24-bar arrangement at 84 BPM lasts about 69 seconds and returns to its opening. It starts after a user gesture, uses the existing music volume and mute bus, and fades when muted or leaving the menu.
-- Part C (`dd8ce48`): Play opens a portrait Canvas scene with a repeating Kenney ground tile, camera-following survivor, floating lower-screen joystick, WASD/arrow controls, fixed timestep, rotation toward movement, pause-to-menu button, and opt-in FPS counter on `?debug=1`.
+Part B adds up to 150 pooled Walker and Runner enemies, wave-scaled spawning, player contact damage and brief invulnerability, nearest-target pistol fire, pooled bullets and XP gems, XP leveling, HUD, run timer, death/retry/menu screen, five-minute survival placeholder, and `?debug=1` enemy/bullet counts. The existing menu content and navigation remain in place.
 
-No enemies, XP, cards, new art, frameworks, or audio files were added. Browser and physical phone testing were not run.
+The extra Runner tint is derived from the Kenney zombie sprite. No audio files, frameworks, or external art were added. Gem art uses the explicitly permitted tiny code-drawn fallback; bullet art is a 2 × 6 px tracer.
+
+## Skills used
+
+- **game-engine:** Kept the existing `requestAnimationFrame` loop and fixed 1/60 s simulation step with capped elapsed time; used fixed-capacity enemy, bullet, and gem pools; capped active enemies at 150; rebuilt a fixed-size spatial hash for contact and projectile broad-phase checks; retained pointer-based touch input and user-gesture audio startup; kept update and draw work bounded by pool capacities.
+- **frontend-design:** Kept HUD labels short and task-focused; used high-contrast meter fills and restrained colors drawn from the existing game palette; placed controls against iPhone safe-area insets; made game-end actions explicit and touch-sized; limited the new overlay and toast to actionable state changes.
 
 ## Changed files
 
-Part A:
-
-- `styles.css` — moved the home content toward the top and reduced short-screen padding.
-- `CHANGELOG.md` — recorded Part A.
-
-Part B:
-
-- `src/music.js` — layered procedural loop with bass pulse, filtered two-oscillator pad, sparse arpeggio, tension-section heartbeat kick and higher notes, filtered noise, compression, and fade controls; exports `start()`, `stop()`, and `setVolume()`.
-- `src/audio.js` — connected music fades to the existing gesture gate, mute, and volume settings.
-- `src/main.js` — resumes menu music on menu screens and stops it in the game.
-- `CHANGELOG.md` — recorded Part B.
-
-Part C:
-
-- `index.html` — replaced the coming-soon placeholder with the game canvas and controls; Play now opens the scene.
-- `styles.css` — added the full-viewport portrait canvas, safe-area pause control, joystick visuals, and crisp rendering.
-- `src/main.js` — initializes the scene and toggles game and menu states.
-- `src/input.js` — floating touch joystick and keyboard input.
-- `src/player.js` — player state, movement, and facing direction.
-- `src/scene.js` — canvas resizing, fixed timestep, camera, repeating ground, sprite rendering, and debug FPS.
-- `CHANGELOG.md` — recorded Part C.
+- `src/music.js` — procedural rhythm, bass, lead, pad, and compressor arrangement.
+- `src/enemies.js` — Walker/Runner stats, pool, ring spawning, hash grid, and sprite rendering.
+- `src/weapons.js` — nearest-target pistol, pooled bullets, collision and tracer rendering.
+- `src/xp.js` — pooled drops, magnet pickup, leveling, toast timing, and gem rendering.
+- `src/player.js` — player HP and invulnerability state.
+- `src/hud.js` — run HUD and end-screen updates.
+- `src/scene.js` — game loop integration, damage, run timing, rendering, and debug counts.
+- `src/main.js` — reusable support heart on both the menu and run-end screen.
+- `index.html` — game HUD, toast, and run-end controls.
+- `styles.css` — phone-safe HUD and run-end presentation.
+- `CHANGELOG.md` — Part A and Part B entries.
+- `report.md` — copy of this report.
 
 ## Commands run
 
-- Read `AGENTS.md`, `docs/GAME_DESIGN.md`, `assets/SPRITES.md`, and both requested skills — succeeded.
-- Inspected existing menu, style, audio, and source files — succeeded.
-- Tried to generate a tile contact sheet with Python/Pillow — failed because Pillow is unavailable; inspected the existing Kenney tile sheet and individual tiles with the image viewer instead, selecting `tile_05.png`.
-- `node --check src/music.js`, `node --check src/audio.js`, `node --check src/main.js` — succeeded.
-- `node --check src/input.js`, `node --check src/player.js`, `node --check src/scene.js`, `node --check src/main.js` — succeeded.
-- `git diff --check` before the Part B and Part C commits — succeeded.
-- `git commit -m "style: tighten main menu layout"` — succeeded as `3f6f3b4`.
-- `git commit -m "feat: upgrade procedural menu music"` — succeeded as `55f1412`.
-- `git commit -m "feat: add core player movement scene"` — succeeded as `dd8ce48`.
-- `git status --short --branch` — worktree clean; branch is three commits ahead of `origin/main`.
+- Read `AGENTS.md`, `docs/GAME_DESIGN.md`, `assets/SPRITES.md`, `.agents/skills/game-engine/SKILL.md`, and `.agents/skills/frontend-design/SKILL.md`.
+- Inspected existing source, menu, styles, and Kenney sprite inventory.
+- `node --check` on `src/music.js`, `src/scene.js`, `src/enemies.js`, `src/weapons.js`, `src/xp.js`, `src/hud.js`, and `src/main.js` — succeeded.
+- `git diff --check` — succeeded.
+- `file` on Kenney tile images — succeeded.
+- Attempted a Python/Pillow image check — failed; see exact error below.
+- Part A commit: `ab8a323` (`Rework procedural synthwave music`).
 
 ## Problems and errors (exact text)
 
-The optional contact-sheet command could not run because Pillow is not installed. Its exact error text was:
+The optional Python image-inspection command failed because Pillow is not installed:
 
 ```text
 ModuleNotFoundError: No module named 'PIL'
-Script error: unable to locate image at `/tmp/kenney-tiles.jpg` (no such file or directory (os error 2))
 ```
 
-This did not block tile selection; the existing tile sheet and `tile_05.png` were inspected directly. No other command errors occurred.
+The selected tile was not suitable as an XP gem, so the implementation uses the request's tiny code-drawn gem fallback. No other command errors occurred. Browser and physical iPhone playtesting have not been run.
 
 ## How to test on iPhone
 
-Open the static site in Safari and check these sizes in responsive preview or on device:
-
-1. At 390 × 844 and 375 × 667, verify the main menu content sits higher with less dead space and the heart button remains in its original corner.
-2. Tap once on the menu and confirm music starts. In Settings, set Music to 0 and confirm it fades out; restore volume and enable Mute audio to confirm it fades out again.
-3. Tap Play. Confirm the ground fills the portrait screen, repeats while moving, and the survivor remains centered as the camera follows.
-4. Touch and drag in the lower half. Confirm the joystick appears under the initial touch and the player moves and turns with the drag. Lift and confirm the joystick disappears.
-5. Tap the top-right pause control. Confirm the main menu returns and menu music fades back in.
-6. Open `?debug=1` and confirm the FPS counter appears; open without that query and confirm it is absent.
-7. Check the pause button respects the top/right safe areas and the canvas stays crisp during movement.
+1. Open the static game in Safari and tap Play. Drag in the lower half of the screen and confirm movement while the survivor remains centered.
+2. Wait for enemies to enter from beyond the screen edges. Confirm Walkers approach, the smaller tinted Runners begin appearing after 1:00, and the pistol fires automatically toward the nearest visible target.
+3. Let an enemy touch the player. Confirm the HP bar decreases and the player flashes during the short invulnerability window.
+4. Move near a dropped gem. Confirm it is pulled toward the player, collected, and advances the XP meter; collect enough to see the level-up toast.
+5. Confirm the HUD remains inside the top safe area, the pause button remains reachable, and the joystick responds without scrolling the page.
+6. For a quick end-screen check, allow HP to reach zero; verify time and kills, Try again, Menu, and the support heart. A full run should show “You survived” at 5:00.
+7. Open with `?debug=1` and verify FPS plus active enemy and bullet counts; without it, the counter should be hidden.
+8. On the menu, start audio with a tap; listen for the beat and layered entrances, then check volume and mute in Settings.
 
 ## Suggested next step
 
-Test the scene and audio on iPhone Safari, then add the first enemy encounter and XP loop as a separate task.
+Playtest enemy pacing, damage, and pickup feel on iPhone Safari, then tune those values before adding cards and the 5:00 boss encounter.
