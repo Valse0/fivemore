@@ -22,6 +22,7 @@ const server = http.createServer((req, res) => {
   page.on('console', msg => { if (msg.type() === 'error' && !msg.text().includes('favicon.ico')) consoleErrors.push(msg.text()); });
   await page.addInitScript(() => {
     window.__bulletDraws = [];
+    window.__gemDraws = [];
     const original = CanvasRenderingContext2D.prototype.fillRect;
     CanvasRenderingContext2D.prototype.fillRect = function(...args) {
       if (this.canvas?.id === 'game-canvas' && this.fillStyle === '#f6ce67' && window.__bulletDraws.length < 20) {
@@ -29,8 +30,17 @@ const server = http.createServer((req, res) => {
       }
       return original.apply(this, args);
     };
+    const originalDrawImage = CanvasRenderingContext2D.prototype.drawImage;
+    CanvasRenderingContext2D.prototype.drawImage = function(source, ...args) {
+      if (this.canvas?.id === 'game-canvas' && source instanceof HTMLCanvasElement && source.width === 96 && source.height === 32 && args.length === 8) {
+        const t = this.getTransform(); const x = args[4] + args[6] / 2; const y = args[5] + args[7] / 2;
+        window.__gemDraws.push({ x: t.a*x + t.c*y + t.e, y: t.b*x + t.d*y + t.f });
+      }
+      return originalDrawImage.call(this, source, ...args);
+    };
   });
-  await page.goto(`http://127.0.0.1:${server.address().port}/index.html?scale=0.7&debug=1`);
+  const scale = Number(process.argv[3]) || 0.7;
+  await page.goto(`http://127.0.0.1:${server.address().port}/index.html?scale=${scale}&debug=1`);
   await page.locator('#home [data-screen="game"]').click();
   await page.evaluate(async () => { (await import('/src/player.js')).player.hp = 100000; });
   await page.waitForTimeout(1800);
@@ -68,11 +78,19 @@ const server = http.createServer((req, res) => {
   contact.dropped = contact.hpAfter < contact.before;
   const gem = await page.evaluate(async () => {
     const { player } = await import('/src/player.js'); const { progression, dropGem } = await import('/src/xp.js');
-    const before = progression.xp; dropGem(player.x, player.y); return { before };
+    const before = progression.xp; dropGem(player.x + 55, player.y); return { before };
+  });
+  await page.waitForTimeout(100);
+  const gemDrawing = await page.evaluate(() => {
+    const drawnAtPx = window.__gemDraws.length ? window.__gemDraws.at(-1) : null;
+    const expectedAtPx = [195 + 55 * Number(new URLSearchParams(location.search).get('scale')), 422];
+    return { drawnAtPx: drawnAtPx ? [Number(drawnAtPx.x.toFixed(2)), Number(drawnAtPx.y.toFixed(2))] : null,
+      expectedAtPx, differencePx: drawnAtPx ? Number(Math.hypot(drawnAtPx.x-expectedAtPx[0], drawnAtPx.y-expectedAtPx[1]).toFixed(2)) : null };
   });
   await page.waitForTimeout(1100);
   gem.after = await page.evaluate(async () => (await import('/src/xp.js')).progression.xp);
   gem.collected = gem.after > gem.before;
+  Object.assign(gem, { ...gemDrawing, collected: gem.after > gem.before });
   const bullet = await page.evaluate(async () => {
     const { player } = await import('/src/player.js');
     const draws = window.__bulletDraws; const first = draws[0]; const r = document.querySelector('#game-canvas').getBoundingClientRect();
@@ -90,7 +108,7 @@ const server = http.createServer((req, res) => {
   }
   const largestDrop = Math.max(0, ...counts.slice(1).map((n,i)=>counts[i]-n));
   await page.screenshot({ path: path.join(root, `reports/screenshots/${process.argv[2] || 'gameplay'}.png`) });
-  const out = { viewport: [390,844], scale: 0.7, movement, contact, bullet, gem,
+  const out = { viewport: [390,844], scale, movement, contact, bullet, gem,
     enemies30s: { first: counts[0], last: counts.at(-1), minimum: Math.min(...counts), maximum: Math.max(...counts), largestDrop },
     canvas: state.canvas, audioAfterTap: state.audio, consoleErrors };
   console.log(JSON.stringify(out));
