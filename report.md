@@ -1,52 +1,75 @@
-# Audio fix and menu polish report
+# FIVEMORE menu and movement report
 
 ## Summary
 
-Fixed menu audio startup for iPhone Safari by creating/resuming Web Audio from click, touchend, and pointerup gestures, waiting for the context to reach `running`, and retrying on later gestures when needed. The first gesture also starts a short, silent looping WAV generated in memory as a data URI to switch iOS Safari to playback mode. Music now uses the settings master gain once, with a clearly audible default level. Settings includes a Test sound button, and `?debug=1` shows the audio context state and current music gain; debug output is hidden by default.
+Completed all three parts in separate commits:
 
-Polished the Support screen Back placement, set menu sprite rendering to pixelated with exact integer scale dimensions, and moved the coordinates below the zombie sprite baseline. The heart button, colors, copy, and other screens were left as they were.
+- Part A (`3f6f3b4`): tightened main-menu spacing while leaving the heart button, colors, copy, and sprites in place.
+- Part B (`55f1412`): replaced the short melody with a layered procedural D minor survival theme. The 24-bar arrangement at 84 BPM lasts about 69 seconds and returns to its opening. It starts after a user gesture, uses the existing music volume and mute bus, and fades when muted or leaving the menu.
+- Part C (`dd8ce48`): Play opens a portrait Canvas scene with a repeating Kenney ground tile, camera-following survivor, floating lower-screen joystick, WASD/arrow controls, fixed timestep, rotation toward movement, pause-to-menu button, and opt-in FPS counter on `?debug=1`.
 
-Part A was committed as `ba9954f` and completed with the valid silent WAV correction in `d421670`. Part B was committed separately as `141fd9e`.
+No enemies, XP, cards, new art, frameworks, or audio files were added. Browser and physical phone testing were not run.
 
 ## Changed files
 
-- `src/audio.js` — user-gesture audio setup and resume retry, generated silent iOS audio loop, test tone, and audio debug status.
-- `src/music.js` — removed the extra music gain stage and raised note levels.
-- `src/main.js` — listens for click, touchend, and pointerup; wires Test sound and the opt-in debug line.
-- `index.html` — Test sound control and hidden debug status line in Settings.
-- `styles.css` — Test sound/debug styling, support Back position, integer-scale pixel sprite dimensions, and coordinate placement.
-- `CHANGELOG.md` — one entry for Part A and one for Part B.
-- `reports/2026-11-13-audio-fix-polish.md` and `report.md` — this report and its root copy.
+Part A:
+
+- `styles.css` — moved the home content toward the top and reduced short-screen padding.
+- `CHANGELOG.md` — recorded Part A.
+
+Part B:
+
+- `src/music.js` — layered procedural loop with bass pulse, filtered two-oscillator pad, sparse arpeggio, tension-section heartbeat kick and higher notes, filtered noise, compression, and fade controls; exports `start()`, `stop()`, and `setVolume()`.
+- `src/audio.js` — connected music fades to the existing gesture gate, mute, and volume settings.
+- `src/main.js` — resumes menu music on menu screens and stops it in the game.
+- `CHANGELOG.md` — recorded Part B.
+
+Part C:
+
+- `index.html` — replaced the coming-soon placeholder with the game canvas and controls; Play now opens the scene.
+- `styles.css` — added the full-viewport portrait canvas, safe-area pause control, joystick visuals, and crisp rendering.
+- `src/main.js` — initializes the scene and toggles game and menu states.
+- `src/input.js` — floating touch joystick and keyboard input.
+- `src/player.js` — player state, movement, and facing direction.
+- `src/scene.js` — canvas resizing, fixed timestep, camera, repeating ground, sprite rendering, and debug FPS.
+- `CHANGELOG.md` — recorded Part C.
 
 ## Commands run
 
-- `cat AGENTS.md && ... cat docs/GAME_DESIGN.md ... cat .agents/skills/frontend-design/SKILL.md ... cat .agents/skills/game-engine/SKILL.md` — succeeded; read project rules, design decisions, and both requested skills.
-- `git status --short --branch && rg -n ... && rg --files | sort` — succeeded; inspected the clean worktree and located audio, settings, support, sprite, and debug code. The combined output was truncated by the command tool, so focused reads followed.
-- `sed -n ...` and `cat CHANGELOG.md` / `cat report.md` — succeeded; inspected the relevant source, CSS, changelog, and prior report.
-- `rg -n "DEBUG|debug" src index.html styles.css` — succeeded; no existing debug flag was present, so `?debug=1` was added as an opt-in gate.
-- `file 'assets/graphs/kenney/PNG/Zombie 1/zoimbie1_stand.png' 'assets/graphs/kenney/PNG/Survivor 1/survivor1_gun.png'` — succeeded; confirmed source sprite dimensions of 33×43 and 51×43.
-- `git diff --check` — succeeded before each implementation commit with no whitespace errors.
-- `git add ... && git commit -m "fix: restore menu audio on iPhone Safari"` — succeeded; created `ba9954f`.
-- `git add ... && git commit -m "polish: refine support and menu sprite layout"` — succeeded; created `141fd9e`.
-- `git add src/audio.js && git commit -m "fix: provide valid silent iOS audio loop"` — succeeded; created `d421670` after final review identified that a zero-length silent WAV payload could fail to sustain playback mode.
-- `git status --short --branch` — succeeded; worktree was clean after implementation commits.
+- Read `AGENTS.md`, `docs/GAME_DESIGN.md`, `assets/SPRITES.md`, and both requested skills — succeeded.
+- Inspected existing menu, style, audio, and source files — succeeded.
+- Tried to generate a tile contact sheet with Python/Pillow — failed because Pillow is unavailable; inspected the existing Kenney tile sheet and individual tiles with the image viewer instead, selecting `tile_05.png`.
+- `node --check src/music.js`, `node --check src/audio.js`, `node --check src/main.js` — succeeded.
+- `node --check src/input.js`, `node --check src/player.js`, `node --check src/scene.js`, `node --check src/main.js` — succeeded.
+- `git diff --check` before the Part B and Part C commits — succeeded.
+- `git commit -m "style: tighten main menu layout"` — succeeded as `3f6f3b4`.
+- `git commit -m "feat: upgrade procedural menu music"` — succeeded as `55f1412`.
+- `git commit -m "feat: add core player movement scene"` — succeeded as `dd8ce48`.
+- `git status --short --branch` — worktree clean; branch is three commits ahead of `origin/main`.
 
 ## Problems and errors (exact text)
 
-No commands failed. The command tool reported this output truncation warning during the broad file search:
+The optional contact-sheet command could not run because Pillow is not installed. Its exact error text was:
 
-`Warning: truncated output (original token count: 12027)`
+```text
+ModuleNotFoundError: No module named 'PIL'
+Script error: unable to locate image at `/tmp/kenney-tiles.jpg` (no such file or directory (os error 2))
+```
 
-The empty WAV payload concern was corrected before completion by generating a valid 0.1-second silent PCM WAV in memory.
+This did not block tile selection; the existing tile sheet and `tile_05.png` were inspected directly. No other command errors occurred.
 
 ## How to test on iPhone
 
-On an iPhone 11 (or similar) in Safari, open the game with the silent switch enabled. Tap anywhere on the menu and confirm the music starts; if it does not start on the first attempt, tap again and confirm it resumes. Open Settings and use Test sound to confirm a short beep. Move Music to 0 and confirm the menu loop becomes silent; restore it, enable Mute audio, and confirm both music and the test sound are muted. Reload and confirm saved volume and mute settings persist.
+Open the static site in Safari and check these sizes in responsive preview or on device:
 
-For the debug line, open the page with `?debug=1` and check Settings for the AudioContext state and music gain; without that query parameter, the line should remain hidden. On the home screen, confirm the heart stays in place, the coordinate text no longer overlaps the zombie, and both sprites look crisp. Open Support and confirm Back sits at the top-left below the logo. Check at 390×844 and a shorter phone viewport.
-
-No physical iPhone test was run.
+1. At 390 × 844 and 375 × 667, verify the main menu content sits higher with less dead space and the heart button remains in its original corner.
+2. Tap once on the menu and confirm music starts. In Settings, set Music to 0 and confirm it fades out; restore volume and enable Mute audio to confirm it fades out again.
+3. Tap Play. Confirm the ground fills the portrait screen, repeats while moving, and the survivor remains centered as the camera follows.
+4. Touch and drag in the lower half. Confirm the joystick appears under the initial touch and the player moves and turns with the drag. Lift and confirm the joystick disappears.
+5. Tap the top-right pause control. Confirm the main menu returns and menu music fades back in.
+6. Open `?debug=1` and confirm the FPS counter appears; open without that query and confirm it is absent.
+7. Check the pause button respects the top/right safe areas and the canvas stays crisp during movement.
 
 ## Suggested next step
 
-Test the gesture and silent-switch behavior on a physical iPhone, since desktop browsers cannot validate iOS audio-session routing.
+Test the scene and audio on iPhone Safari, then add the first enemy encounter and XP loop as a separate task.

@@ -1,6 +1,7 @@
 import { getAudioDebugStatus, getAudioSettings, playTestSound, setAudioSetting, setMenuMusicActive, startAudioFromGesture } from "./audio.js";
 import { SUPPORT_LINKS } from "./links.js";
 import { createHeartButton } from "./support.js";
+import { initializeGame, setGameActive } from "./scene.js";
 
 const screens = [...document.querySelectorAll(".screen")];
 const navigationButtons = document.querySelectorAll("[data-screen]");
@@ -17,6 +18,8 @@ function showScreen(screenId) {
 
   for (const screen of screens) screen.hidden = screen !== nextScreen;
   setMenuMusicActive(screenId !== "game");
+  setGameActive(screenId === "game");
+  document.body.classList.toggle("game-active", screenId === "game");
   const heading = nextScreen.querySelector("h1");
   if (heading) {
     heading.setAttribute("tabindex", "-1");
@@ -27,6 +30,8 @@ function showScreen(screenId) {
 navigationButtons.forEach((button) => {
   button.addEventListener("click", () => showScreen(button.dataset.screen));
 });
+
+initializeGame();
 
 document.querySelector("#support-heart-slot").append(
   createHeartButton({ onClick: () => showScreen("support") }),

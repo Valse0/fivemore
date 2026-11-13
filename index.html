@@ -34,7 +34,7 @@
         </div>
 
         <nav class="menu-actions" aria-label="Main menu">
-          <button class="menu-button menu-button-primary" type="button" data-screen="coming-soon">Play</button>
+          <button class="menu-button menu-button-primary" type="button" data-screen="game">Play</button>
           <button class="menu-button" type="button" data-screen="settings">Settings</button>
         </nav>
         <p class="home-footnote">One finger to move. The rest is up to you.</p>
@@ -76,12 +76,13 @@
         <p class="screen-note">Your sound settings stay on this device.</p>
       </section>
 
-      <section class="screen sub-screen" id="coming-soon" aria-labelledby="coming-title" hidden>
-        <button class="back-button" type="button" data-screen="home">Back</button>
-        <p class="eyebrow">Transmission received</p>
-        <h1 id="coming-title">Game coming soon</h1>
-        <p class="screen-note">The safe zone is being prepared. Check back for your first run.</p>
-        <img class="coming-zombie" src="assets/graphs/kenney/PNG/Zombie%201/zoimbie1_stand.png" alt="A zombie waits beyond the safe zone" width="74" height="96">
+      <section class="screen game-screen" id="game" aria-label="Game scene" hidden>
+        <canvas id="game-canvas" aria-label="Move with the floating joystick"></canvas>
+        <button class="pause-button" id="pause-game" type="button" aria-label="Pause and return to menu">Ⅱ</button>
+        <span class="fps-counter" id="fps-counter" hidden></span>
+        <div class="virtual-stick" id="virtual-stick" aria-hidden="true">
+          <span class="virtual-stick-knob"></span>
+        </div>
       </section>
 
       <footer class="site-footer"><span>FIVEMORE</span><span>Stay for one more.</span></footer>

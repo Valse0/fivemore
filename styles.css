@@ -195,6 +195,28 @@ input[type="checkbox"][role="switch"]:checked::before { transform: translateX(24
 
 .coming-zombie { align-self: center; margin-top: 28px; object-fit: contain; image-rendering: pixelated; }
 
+.game-active .shell { width: 100%; min-height: 0; height: 100vh; height: 100svh; padding: 0; }
+.game-active .masthead, .game-active .site-footer { display: none; }
+.game-screen { position: fixed; z-index: 5; inset: 0; width: 100%; height: 100vh; height: 100svh; padding: 0; overflow: hidden; background: #765b3c; touch-action: none; }
+#game-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; }
+.pause-button {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(240,234,219,.72);
+  background: rgba(17,24,18,.82);
+  color: var(--ink);
+  font-size: 20px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.fps-counter { position: absolute; top: max(18px, env(safe-area-inset-top)); left: 14px; color: var(--ink); font: 12px ui-monospace, monospace; text-shadow: 1px 1px #111812; }
+.virtual-stick { position: absolute; z-index: 1; left: 0; top: 0; width: 104px; height: 104px; display: none; border: 2px solid rgba(240,234,219,.42); border-radius: 50%; background: rgba(17,24,18,.24); pointer-events: none; transform: translate(-50%, -50%); }
+.virtual-stick.visible { display: grid; place-items: center; }
+.virtual-stick-knob { width: 44px; height: 44px; border: 1px solid rgba(240,234,219,.72); border-radius: 50%; background: rgba(231,184,78,.56); }
+
 .site-footer { min-height: 36px; margin-top: auto; padding-top: 14px; color: #7f887c; font-size: 9px; letter-spacing: .06em; }
 
 @media (max-height: 700px) {
