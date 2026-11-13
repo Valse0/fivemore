@@ -1,4 +1,6 @@
 import { getAudioSettings, setAudioSetting, startAudioFromGesture } from "./audio.js";
+import { SUPPORT_LINKS } from "./links.js";
+import { createHeartButton } from "./support.js";
 
 const screens = [...document.querySelectorAll(".screen")];
 const navigationButtons = document.querySelectorAll("[data-screen]");
@@ -22,6 +24,13 @@ function showScreen(screenId) {
 
 navigationButtons.forEach((button) => {
   button.addEventListener("click", () => showScreen(button.dataset.screen));
+});
+
+document.querySelector("#support-heart-slot").append(
+  createHeartButton({ onClick: () => showScreen("support") }),
+);
+document.querySelectorAll("[data-support-link]").forEach((link) => {
+  link.href = SUPPORT_LINKS[link.dataset.supportLink];
 });
 
 document.addEventListener("pointerdown", startAudioFromGesture, { once: true, passive: true });

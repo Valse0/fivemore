@@ -16,6 +16,10 @@
       </header>
 
       <section class="screen home-screen" id="home" aria-labelledby="game-title">
+        <div class="home-topline">
+          <span class="home-topline-spacer" aria-hidden="true"></span>
+          <div id="support-heart-slot"></div>
+        </div>
         <div class="hero-copy">
           <p class="eyebrow">The city fell at 05:00</p>
           <h1 id="game-title">Five minutes.<br><em>Five more?</em></h1>
@@ -34,6 +38,17 @@
           <button class="menu-button" type="button" data-screen="settings">Settings</button>
         </nav>
         <p class="home-footnote">One finger to move. The rest is up to you.</p>
+      </section>
+
+      <section class="screen sub-screen support-screen" id="support" aria-labelledby="support-title" hidden>
+        <button class="back-button" type="button" data-screen="home">Back</button>
+        <p class="eyebrow">A little help goes a long way</p>
+        <h1 id="support-title">Support</h1>
+        <p class="support-copy">FIVEMORE is made by one person. Thanks for playing.</p>
+        <div class="support-actions">
+          <a class="menu-button menu-button-primary" data-support-link="kofi" target="_blank" rel="noopener noreferrer">Support on Ko-fi</a>
+          <a class="menu-button" data-support-link="feedback" target="_blank" rel="noopener noreferrer">Give feedback</a>
+        </div>
       </section>
 
       <section class="screen sub-screen" id="settings" aria-labelledby="settings-title" hidden>

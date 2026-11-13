@@ -5,3 +5,4 @@
 - 2026-11-12: Recorded the run, enemy, card, and gold progression decisions in the game design document.
 - 2026-11-12: Added the portrait main menu, settings and credits screens, plus tap-gated audio settings storage.
 - 2026-11-12: Added `report.md` with the setup summary, local run instructions, and phone checks.
+- 2026-11-13: Added a reusable heart button and support screen with configurable external links.
