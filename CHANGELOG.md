@@ -14,3 +14,4 @@
 - 2026-11-13: Tightened main-menu vertical spacing for standard and short phone screens.
 - 2026-11-13: Replaced the short menu melody with a layered, fade-controlled procedural survival theme.
 - 2026-11-13: Added the first playable canvas scene with infinite ground, survivor movement, touch joystick, and keyboard controls.
+- 2026-11-13: Zoomed the gameplay camera out by 1.5× through WORLD_SCALE.

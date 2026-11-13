@@ -4,6 +4,7 @@ import { drawEnemies, getEnemyCount, getKillCount, forNearby, resetEnemies, upda
 import { drawBullets, getBulletCount, resetWeapons, setGemDropCallback, updateWeapons } from "./weapons.js";
 import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
+import { WORLD_SCALE } from "./config.js";
 
 const TILE_SIZE = 64;
 const STEP = 1 / 60;
@@ -63,7 +64,7 @@ function update(dt) {
   player.invulnerable = Math.max(0, player.invulnerable - dt);
   readMovement(movement);
   updatePlayer(movement, dt);
-  updateEnemies(player, dt, runTime, width, height);
+  updateEnemies(player, dt, runTime, width / WORLD_SCALE, height / WORLD_SCALE);
   forNearby(player.x, player.y, takeContactDamage);
   updateWeapons(player, dt);
   updateXP(player, dt);
@@ -78,20 +79,23 @@ function update(dt) {
 function render() {
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   context.fillStyle = "#765b3c"; context.fillRect(0, 0, width, height);
+  context.translate(width / 2, height / 2);
+  context.scale(WORLD_SCALE, WORLD_SCALE);
+  const viewWidth = width / WORLD_SCALE; const viewHeight = height / WORLD_SCALE;
   if (groundImage.complete && groundImage.naturalWidth) {
-    const cameraLeft = player.x - width / 2; const cameraTop = player.y - height / 2;
+    const cameraLeft = player.x - viewWidth / 2; const cameraTop = player.y - viewHeight / 2;
     const firstTileX = Math.floor(cameraLeft / TILE_SIZE); const firstTileY = Math.floor(cameraTop / TILE_SIZE);
     const offsetX = -(cameraLeft - firstTileX * TILE_SIZE); const offsetY = -(cameraTop - firstTileY * TILE_SIZE);
-    for (let y = offsetY - TILE_SIZE; y < height + TILE_SIZE; y += TILE_SIZE)
-      for (let x = offsetX - TILE_SIZE; x < width + TILE_SIZE; x += TILE_SIZE)
+    for (let y = offsetY - TILE_SIZE; y < viewHeight + TILE_SIZE; y += TILE_SIZE)
+      for (let x = offsetX - TILE_SIZE; x < viewWidth + TILE_SIZE; x += TILE_SIZE)
         context.drawImage(groundImage, Math.round(x), Math.round(y), TILE_SIZE, TILE_SIZE);
   }
-  drawGems(context, player, width, height, null);
-  drawEnemies(context, runnerImage, player, width, height, tintedRunner);
-  drawBullets(context, player, width, height);
+  drawGems(context, player, viewWidth, viewHeight, null);
+  drawEnemies(context, runnerImage, player, viewWidth, viewHeight, tintedRunner);
+  drawBullets(context, player, viewWidth, viewHeight);
   if (playerImage.complete && playerImage.naturalWidth) {
     if (player.invulnerable > 0 && Math.floor(player.invulnerable * 18) % 2 === 0) context.globalAlpha = 0.38;
-    context.save(); context.translate(Math.round(width / 2), Math.round(height / 2));
+    context.save(); context.translate(0, 0);
     context.rotate(player.angle); context.drawImage(playerImage, -32, -32, 64, 64); context.restore(); context.globalAlpha = 1;
   }
 }
