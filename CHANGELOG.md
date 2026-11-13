@@ -2,6 +2,8 @@
 - 2026-11-13 17:01 Peru: Removed the stuck hurt pose and added configured red hit tint and collision-safe recoil.
 - 2026-11-13 16:32 Peru: Documented the separate Agent Sprite Forge installation, asset test, API checks, and local credential setup.
 # Changelog
+- 2026-11-13 18:20 Peru: Added phase-by-phase master plan and started FAZ 1 with baseline Playwright proof.
+- 2026-11-13 18:18 Peru: Added the requested master phase plan, Gemini handoff instruction, backlog, and initial phase handoff status.
 - 2026-11-13 20:22 UTC: Increased survivor draw size from 64 to 76 world units without changing collision radius.
 - 2026-11-13 20:21 UTC: Added configured circular collisions and axis sliding around static props for survivors and zombies.
 - 2026-11-13 20:19 UTC: Removed the white inner muzzle flare, retaining the directional amber muzzle light.

@@ -36,3 +36,12 @@
 - Runs award gold for permanent upgrades.
 - Gold and permanent upgrade progress are stored in `localStorage`.
 - On death, only 50% of run-earned gold is retained.
+
+## Backlog
+
+- Bomb
+- Molotov with a burning area that can ignite trees
+- Flamethrower
+- Machine gun
+- Melee bat
+- Additional pickup types
