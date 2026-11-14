@@ -1,6 +1,6 @@
 import { PLAYER_COLLIDER_RADIUS, PLAYER_HURT_DURATION, PLAYER_HURT_RECOIL_DISTANCE } from "./config.js";
 import { moveCircle } from "./obstacles.js";
-export const player = { x: 0, y: 0, angle: 0, shotAngle: 0, speed: 180, hp: 100, invulnerable: 0, hurtTimer: 0, firing: 0, recoil: 0 };
+export const player = { x: 0, y: 0, angle: 0, shotAngle: 0, speed: 180, hp: 100, maxHp: 100, invulnerable: 0, hurtTimer: 0, firing: 0, recoil: 0 };
 
 export function damagePlayerFrom(enemy) {
   player.hurtTimer = PLAYER_HURT_DURATION;

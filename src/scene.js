@@ -9,8 +9,11 @@ import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
 import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, WEAPON_MUZZLE_OFFSET, ENEMY_ATTACK_ANIMATIONS, BREAKABLE_CONFIG, PLAYER_ANIMATION } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { drawParticles, updateParticles } from "./particles.js";
-import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
+import { playerHurt, ambientGroan, gameOver, bulletHit } from "./sfx.js";
 import { updateGameplayMusicTime, stopGameplayMusic } from "./audio.js";
+import { cards, getRandomCards, applyCardUpgrade, resetCards } from "./cards.js";
+import { weaponsState } from "./weapons.js";
+import { xpState } from "./xp.js";
 
 const TILE_SIZE = 64;
 const V2_TILE_SIZE = 32;

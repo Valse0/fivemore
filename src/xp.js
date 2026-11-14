@@ -5,7 +5,9 @@ import { sprites, drawFrame, frameCount } from "./assets.js";
 
 const MAX_GEMS = 150;
 const gems = Array.from({ length: MAX_GEMS }, () => ({ active: false, x: 0, y: 0, vx: 0, vy: 0, age: 0, value: 1, color: 0, scale: 1 }));
-export const progression = { xp: 0, needed: 4, level: 1, toast: 0, pulse: 0 };
+export const progression = { xp: 0, needed: 4, level: 1, toast: 0, pulse: 0, levelUpQueue: 0 };
+export const xpState = { pickupRadiusBonus: 0 };
+
 const gemAtlas = document.createElement("canvas"); gemAtlas.width = 96; gemAtlas.height = 32;
 const gc = gemAtlas.getContext("2d");
 const gemColors = ["#69aee8", "#79d69a", "#bd83ec"];
@@ -19,7 +21,8 @@ for (let i = 0; i < 3; i += 1) {
 
 export function resetXP() {
   for (let i = 0; i < MAX_GEMS; i += 1) gems[i].active = false;
-  progression.xp = 0; progression.needed = 4; progression.level = 1; progression.toast = 0; progression.pulse = 0;
+  progression.xp = 0; progression.needed = 4; progression.level = 1; progression.toast = 0; progression.pulse = 0; progression.levelUpQueue = 0;
+  xpState.pickupRadiusBonus = 0;
 }
 
 export function dropGem(x, y) {
@@ -35,14 +38,15 @@ export function updateXP(player, dt) {
   if (progression.toast > 0) progression.toast = Math.max(0, progression.toast - dt);
   progression.pulse = Math.max(0, progression.pulse - dt);
   let leveled = false;
+  const collectRadius = 135 + (xpState.pickupRadiusBonus || 0);
   for (let i = 0; i < MAX_GEMS; i += 1) {
     const gem = gems[i]; if (!gem.active) continue;
     gem.age += dt;
     let dx = player.x - gem.x; let dy = player.y - gem.y;
     let distance = Math.hypot(dx, dy);
     if (gem.age < 0.22) { gem.x += gem.vx * dt; gem.y += gem.vy * dt; gem.vy += 110 * dt; gem.vx *= 0.96; }
-    else if (distance < 135) {
-      const t = 1 - distance / 135; const speed = 70 + t * t * 600;
+    else if (distance < collectRadius) {
+      const t = 1 - distance / collectRadius; const speed = 70 + t * t * 600;
       const move = Math.min(distance, speed * dt); gem.x += dx / (distance || 1) * move; gem.y += dy / (distance || 1) * move;
       dx = player.x - gem.x; dy = player.y - gem.y; distance = Math.hypot(dx, dy);
     }
@@ -52,6 +56,7 @@ export function updateXP(player, dt) {
       while (progression.xp >= progression.needed) {
         progression.xp -= progression.needed; progression.level += 1;
         progression.needed = Math.ceil(progression.needed * 1.3); progression.toast = 1.6; leveled = true;
+        progression.levelUpQueue = (progression.levelUpQueue || 0) + 1;
         levelUp();
       }
     }

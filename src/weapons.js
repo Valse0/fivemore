@@ -17,6 +17,12 @@ let bulletX = 0; let bulletY = 0; let hitIndex = -1;
 let aimAngle = 0;
 let visualTime = 0;
 
+export const weaponsState = {
+  damageBonus: 0,
+  fireIntervalBonus: 0,
+  bulletCount: 1,
+};
+
 function selectNearest(enemy, index) {
   if (!enemy.active) return;
   const dx = enemy.x - bulletX; const dy = enemy.y - bulletY;
@@ -36,6 +42,9 @@ function findBulletHit(enemy, index) {
 export function resetWeapons() {
   for (let i = 0; i < MAX_BULLETS; i += 1) bullets[i].active = false;
   fireClock = 0;
+  weaponsState.damageBonus = 0;
+  weaponsState.fireIntervalBonus = 0;
+  weaponsState.bulletCount = 1;
 }
 
 function fire(player, viewWidth, viewHeight) {
@@ -51,15 +60,20 @@ function fire(player, viewWidth, viewHeight) {
     selectNearest(enemy, i);
   }
   if (!visibleEnemy) return;
-  let bullet = null;
-  for (let i = 0; i < MAX_BULLETS; i += 1) if (!bullets[i].active) { bullet = bullets[i]; break; }
-  if (!bullet) return;
-  const angle = candidate ? Math.atan2(candidate.y - player.y, candidate.x - player.x) : player.angle;
-  bullet.active = true;
-  bullet.x = player.x + Math.cos(angle) * WEAPON_MUZZLE_OFFSET;
-  bullet.y = player.y + Math.sin(angle) * WEAPON_MUZZLE_OFFSET;
-  bullet.vx = Math.cos(angle) * BULLET_SPEED; bullet.vy = Math.sin(angle) * BULLET_SPEED; bullet.life = 1.6;
-  player.shotAngle = angle; player.firing = 0.08; player.recoil = 0.05;
+  const baseAngle = candidate ? Math.atan2(candidate.y - player.y, candidate.x - player.x) : player.angle;
+  const count = weaponsState.bulletCount || 1;
+  for (let bIndex = 0; bIndex < count; bIndex += 1) {
+    let bullet = null;
+    for (let i = 0; i < MAX_BULLETS; i += 1) if (!bullets[i].active) { bullet = bullets[i]; break; }
+    if (!bullet) break;
+    const spread = count > 1 ? (bIndex - (count - 1) / 2) * 0.15 : 0;
+    const angle = baseAngle + spread;
+    bullet.active = true;
+    bullet.x = player.x + Math.cos(angle) * WEAPON_MUZZLE_OFFSET;
+    bullet.y = player.y + Math.sin(angle) * WEAPON_MUZZLE_OFFSET;
+    bullet.vx = Math.cos(angle) * BULLET_SPEED; bullet.vy = Math.sin(angle) * BULLET_SPEED; bullet.life = 1.6;
+  }
+  player.shotAngle = baseAngle; player.firing = 0.08; player.recoil = 0.05;
   pistolShot();
 }
 
@@ -84,7 +98,8 @@ export function updateWeapons(player, dt, viewWidth, viewHeight, onPlayerDamage 
   visualTime += dt;
   player.firing = Math.max(0, player.firing - dt); player.recoil = Math.max(0, player.recoil - dt);
   fireClock -= dt;
-  if (fireClock <= 0) { fire(player, viewWidth, viewHeight); fireClock += 0.5; }
+  const interval = Math.max(0.18, 0.5 - (weaponsState.fireIntervalBonus || 0));
+  if (fireClock <= 0) { fire(player, viewWidth, viewHeight); fireClock += interval; }
   const enemies = getEnemies();
   for (let i = 0; i < MAX_BULLETS; i += 1) {
     const bullet = bullets[i];
@@ -109,7 +124,8 @@ export function updateWeapons(player, dt, viewWidth, viewHeight, onPlayerDamage 
     if (hitIndex !== -1) {
       spawnParticles(bullet.x, bullet.y, 5, "spark");
       bulletHit();
-      if (damageEnemy(hitIndex, 18)) { zombieDeath(enemies[hitIndex].type); if (killsCallback) killsCallback(enemies[hitIndex].x, enemies[hitIndex].y); }
+      const damage = 18 + (weaponsState.damageBonus || 0);
+      if (damageEnemy(hitIndex, damage)) { zombieDeath(enemies[hitIndex].type); if (killsCallback) killsCallback(enemies[hitIndex].x, enemies[hitIndex].y); }
       bullet.active = false;
     } else if (bullet.life <= 0) bullet.active = false;
   }
