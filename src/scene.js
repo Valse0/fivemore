@@ -282,6 +282,7 @@ export function initializeGame() {
     getSpitCount,
     getEnemies,
     isBossAlive,
+    render,
   };
   document.querySelector("#pause-game").addEventListener("click", () => document.querySelector('[data-screen="home"]').click());
   requestAnimationFrame(frame);
