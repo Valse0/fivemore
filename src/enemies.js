@@ -1,4 +1,4 @@
-import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS, ENEMY_CONFIG, ENEMY_ATTACK_ANIMATIONS, ACID_SPLAT_CONFIG, SPITTER_CONFIG, BOSS_SPAWN_TIME, clampArenaX, clampArenaY } from "./config.js";
+import { quantizeDirection, snapWorldPixel, snapWorldSize, DRAW_SIZES, USE_V2_ASSETS, ENEMY_CONFIG, ENEMY_ATTACK_ANIMATIONS, ENEMY_WALK_ANIMATIONS, ACID_SPLAT_CONFIG, SPITTER_CONFIG, BOSS_SPAWN_TIME, clampArenaX, clampArenaY } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { moveCircle, segmentBlockedByObstacle } from "./obstacles.js";
 
@@ -223,7 +223,9 @@ export function drawEnemies(ctx, image, player, viewWidth, viewHeight, runnerIma
         const frame = attack.firstFrame + Math.min(attack.lastFrame - attack.firstFrame, Math.floor(elapsed * attack.fps));
         drawFrame(ctx, attackSprite, frame, -size / 2, -size / 2, size, size, attack.frameSize);
       } else {
-        const frames = frameCount(sprite); const frame = Math.floor(animationTime * 8) % Math.max(1, frames - 2);
+        const walkAnim = ENEMY_WALK_ANIMATIONS[name] || { firstFrame: 0, lastFrame: 3, fps: 8 };
+        const framesCount = walkAnim.lastFrame - walkAnim.firstFrame + 1;
+        const frame = walkAnim.firstFrame + Math.floor(animationTime * walkAnim.fps) % framesCount;
         drawFrame(ctx, sprite, frame, -size / 2, -size / 2, size, size);
       }
     } else {

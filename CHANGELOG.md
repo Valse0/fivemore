@@ -2,7 +2,7 @@
 - 2026-11-13 17:01 Peru: Removed the stuck hurt pose and added configured red hit tint and collision-safe recoil.
 - 2026-11-13 16:32 Peru: Documented the separate Agent Sprite Forge installation, asset test, API checks, and local credential setup.
 # Changelog
-- 2026-11-13 19:19 Peru: Completed the FAZ 3.1 handoff notes and refreshed the 390×844 verification record.
+- 2026-11-14 01:00 Peru: Completed FAZ 3.2 (redesigned main menu with pixel-style title, v2 grass background, v2 survivor/zombie sprites, and touch-friendly buttons).
 - 2026-11-13 19:14 Peru: Verified crate break/pickup, barrel blast/burnmark and projectile pass-through; marked FAZ 2 complete.
 - 2026-11-13 18:56 Peru: Added breakable prop and pickup implementation; recorded unresolved crate hit verification for handoff.
 - 2026-11-13 18:46 Peru: Added a pooled acid splat animation when spitter projectiles hit the player or an obstacle.

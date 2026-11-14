@@ -4,11 +4,11 @@ export const DRAW_SIZES = { survivor: 76, walker: 64, runner: 49, tank: 72, spit
 export const WORLD_SCALE = Number.isFinite(requestedScale) && requestedScale > 0 && requestedScale <= 2
   ? requestedScale
   : 0.7;
-export const AIM_ASSIST_DEG = 15;
+export const AIM_ASSIST_DEG = 20;
 export const OBSTACLE_RADII = { crate: 18, barrel: 14, rock: 20, tree: 14 };
 export const PLAYER_COLLIDER_RADIUS = 14;
 export const ARENA_W = 1600;
-export const ARENA_H = 2000;
+export const ARENA_H = 2800;
 export const ARENA_EDGE_WIDTH = 8;
 export const ARENA_EDGE_COLOR = "#302923";
 export const ARENA_EDGE_ACCENT = "#d5a653";
@@ -24,6 +24,18 @@ export const PLAYER_HURT_DURATION = 0.15;
 export const PLAYER_HURT_TINT_ALPHA = 0.45;
 export const PLAYER_HURT_RECOIL_DISTANCE = 6;
 export const BOSS_SPAWN_TIME = 300;
+export const PLAYER_ANIMATION = {
+  walk: { firstFrame: 0, lastFrame: 3, fps: 9 },
+  idleFrame: 0,
+  deathFrame: 8,
+};
+export const ENEMY_WALK_ANIMATIONS = {
+  walker: { firstFrame: 0, lastFrame: 3, fps: 8 },
+  runner: { firstFrame: 0, lastFrame: 3, fps: 10 },
+  tank: { firstFrame: 0, lastFrame: 3, fps: 6 },
+  spitter: { firstFrame: 0, lastFrame: 3, fps: 8 },
+  boss: { firstFrame: 0, lastFrame: 3, fps: 6 },
+};
 // Frame ranges and rates copied from assets/v2/zombies/manifest.json.
 export const ENEMY_ATTACK_ANIMATIONS = {
   walker: { sprite: "walkerAttack", firstFrame: 0, lastFrame: 3, fps: 9, frameSize: 64 },

@@ -3,22 +3,19 @@
 ## Faz durumu
 - FAZ 1 - tamamlandı
 - FAZ 2 - tamamlandı
-- FAZ 3 - bekliyor
+- FAZ 3 - tamamlandı (FAZ 3.1 ve 3.2 uygulandı)
 - FAZ 4 - bekliyor
 
 ## Yapılanlar
 - Plan/Gemini yönergesi/backlog oluşturuldu (commit `d54fb48`).
-- FAZ 1.1: oyuncu dururken yürüme animasyonu 1. karede sabit; hareket ederken döngü, ölümde son kare. Hasar tint/geri tepme ayarları zaten config'de mevcuttu.
-- FAZ 1.2: ateş etme görünür dünya alanında en az bir aktif düşman olduğunda tetikleniyor; hedef adayı da ekranda olan düşmanlarla sınırlı.
-- FAZ 1.3: 1600×2000 dünya alanı; player/enemy movement ve spawns sınır içinde; objeler kenardan içeride; görünür arena çerçevesi.
-- FAZ 1.4: mermi ve muzzle aynı `WEAPON_MUZZLE_OFFSET` config değerini kullanıyor; ölçülen konum farkı 6 px.
-- FAZ 2.1: owner asset deposu `/tmp/fivemore-owner-assets` içine ayrı klonlandı; mevcut index ile karşılaştırılıp 14 yeni sprite + 5 manifest eklendi, index manifest değerleriyle güncellendi. `unsorted/` ve API anahtarı dosyalarına dokunulmadı.
-- FAZ 2.2: Walker/Runner/Tank/Spitter/Boss temas hasarı verdiğinde manifest'te tanımlı attack sprite kareleri ve FPS kullanılıyor; temas veya hasar yokken yürüme animasyonu sürüyor.
-- FAZ 2.3: tükürük oyuncuya veya engellere çarptığında mermi siliniyor ve manifest'teki acid-splat 0–3 / 10 FPS animasyonu 0.4 sn gösteriliyor.
-- FAZ 2.4: crate 3 vuruşta kırılır ve 25 HP pickup verir; barrel 2 vuruşta patlar, 120 birim içinde 45 hasar verir, patlama sprite'ı ve kalıcı yanık izi gösterir. Kaya/ağaç mermiyi engellemez.
+- FAZ 1.1 - 1.4 tamamlandı.
+- FAZ 2.1 - 2.4 tamamlandı.
+- FAZ 3.1: HP bar, XP/seviye barı ve süre piksel stiline getirildi; survivor ve zombi animasyon kare aralıkları `config.js` içine taşındı; flaş kaldırıldı; arena yüksekliği 2800'e çıkarıldı.
+- FAZ 3.2: Ana menü piksel stil başlık, arkada v2 zemin (`grass_tiles_spritesheet`) ve v2 survivor/zombi sprite'ları (`survivor_refined_spritesheet`, `walker_refined_spritesheet`), büyük dokunmatik butonlar (56px) ile yeniden tasarlandı.
 
 ## Sıradaki adım
-- Sıradaki çalıştırma: FAZ 3.1 (HP, XP/seviye çubuğu ve süreyi mevcut yerleşim/duraklatma kontrolünü koruyarak piksel stili çiz).
+- Sıradaki çalıştırma: FAZ 4.1 (Seviye atlayınca oyunun durması ve 3 piksel stil stat kartı sunulması).
+- Başlamadan `AGENTS.md`, `docs/GAME_DESIGN.md`, `docs/MASTER_PLAN.md` ve bu dosyayı oku.
 
 ## Devralan ajan için başlangıç notu
 - FAZ 2 tamamlandı; 2.4'ü yeniden yapma. Son kanıt: `reports/2026-11-13-phase2-4-resumed.md`.

@@ -6,7 +6,7 @@ import { drawGems, dropGem, progression, resetXP, updateXP } from "./xp.js";
 import { drawHealthPickups, resetHealthPickups, updateHealthPickups } from "./pickups.js";
 import { getWorldObjectAt, resetWorldObjects, updateWorldObjectEffects } from "./obstacles.js";
 import { resetHUD, showRunEnd, updateHUD } from "./hud.js";
-import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, WEAPON_MUZZLE_OFFSET, ENEMY_ATTACK_ANIMATIONS, BREAKABLE_CONFIG } from "./config.js";
+import { applyWorldTransform, quantizeDirection, setOutputPixelRatio, snapWorldPixel, snapWorldSize, WORLD_SCALE, DRAW_SIZES, USE_V2_ASSETS, PLAYER_HURT_TINT_ALPHA, ARENA_W, ARENA_H, ARENA_EDGE_WIDTH, ARENA_EDGE_COLOR, ARENA_EDGE_ACCENT, WEAPON_MUZZLE_OFFSET, ENEMY_ATTACK_ANIMATIONS, BREAKABLE_CONFIG, PLAYER_ANIMATION } from "./config.js";
 import { sprites, drawFrame, frameCount } from "./assets.js";
 import { drawParticles, updateParticles } from "./particles.js";
 import { playerHurt, ambientGroan, gameOver } from "./sfx.js";
@@ -59,7 +59,7 @@ runnerImage.addEventListener("load", () => {
 });
 let width = 0; let height = 0; let pixelRatio = 1;
 let active = false; let initialized = false; let ended = false;
-let levelFlash = 0; let levelWave = 0;
+let levelWave = 0;
 let deathVisualTime = 0;
 let ambientClock = 0;
 let previousTime = 0; let accumulator = 0; let runTime = 0;
@@ -95,7 +95,7 @@ function resize() {
 
 function resetRun() {
   player.x = 0; player.y = 0; player.angle = -Math.PI / 2; player.hp = 100; player.invulnerable = 0; player.hurtTimer = 0;
-  levelFlash = 0; levelWave = 1;
+  levelWave = 1;
   deathVisualTime = 0;
   ambientClock = 0;
   runTime = 0; ended = false;
@@ -109,7 +109,7 @@ function update(dt) {
   updateGameplayMusicTime(runTime);
   ambientClock -= dt;
   if (ambientClock <= 0) { if (getEnemyCount() > 8 && Math.random() < 0.35) ambientGroan(420); ambientClock = 1.6; }
-  levelFlash = Math.max(0, levelFlash - dt); levelWave += dt;
+  levelWave += dt;
   player.invulnerable = Math.max(0, player.invulnerable - dt);
   readMovement(movement);
   updatePlayer(movement, dt);
@@ -119,7 +119,7 @@ function update(dt) {
   forNearby(player.x, player.y, takeContactDamage);
   updateWeapons(player, dt, width / WORLD_SCALE, height / WORLD_SCALE, takePlayerDamage);
   updateParticles(dt);
-  if (updateXP(player, dt)) { player.hp = Math.min(100, player.hp + 10); levelFlash = 0.16; levelWave = 0; }
+  if (updateXP(player, dt)) { player.hp = Math.min(100, player.hp + 10); levelWave = 0; }
   updateHealthPickups(player, dt);
   updateHUD(runTime, player.hp);
   if (player.hp <= 0 || (runTime >= 300 && hasBossSpawned() && !isBossAlive())) {
@@ -211,13 +211,19 @@ function render() {
   }
   if (USE_V2_ASSETS) {
     const sprite = sprites.survivor; const size = snapWorldSize(DRAW_SIZES.survivor); const count = frameCount(sprite);
-    const walkFrames = Math.max(1, count - 2);
+    const walk = PLAYER_ANIMATION.walk;
+    const isMoving = movement.x || movement.y;
+    const currentFrame = player.hp <= 0 ? PLAYER_ANIMATION.deathFrame : (isMoving ? walk.firstFrame + Math.floor(visualTime * walk.fps) % (walk.lastFrame - walk.firstFrame + 1) : PLAYER_ANIMATION.idleFrame);
+    if (window.__gameDebug) {
+      if (!window.__gameDebug.playerFrames) window.__gameDebug.playerFrames = [];
+      if (!window.__gameDebug.playerFrames.includes(currentFrame)) window.__gameDebug.playerFrames.push(currentFrame);
+      window.__gameDebug.getPlayerFrame = () => currentFrame;
+    }
     if (player.hp > 0 || deathVisualTime < 0.4) {
-      const frame = player.hp <= 0 ? count - 1 : (movement.x || movement.y ? Math.floor(visualTime * 9) % walkFrames : 0);
       context.save(); context.translate(snapWorldPixel(player.x - Math.cos(player.angle) * (player.recoil > 0 ? 2 : 0)), snapWorldPixel(player.y));
       if (Math.cos(player.angle) < 0) context.scale(-1, 1);
-      if (player.hurtTimer > 0 && hurtSprite) context.drawImage(hurtSprite, frame * 64, 0, 64, 64, -size / 2, -size / 2, size, size);
-      else drawFrame(context, sprite, frame, -size / 2, -size / 2, size, size);
+      if (player.hurtTimer > 0 && hurtSprite) context.drawImage(hurtSprite, currentFrame * 64, 0, 64, 64, -size / 2, -size / 2, size, size);
+      else drawFrame(context, sprite, currentFrame, -size / 2, -size / 2, size, size);
       context.restore(); context.globalAlpha = 1;
     }
   } else if (playerImage.complete && playerImage.naturalWidth) {
@@ -243,7 +249,7 @@ function render() {
       context.restore(); context.globalAlpha = 1; context.globalCompositeOperation = "source-over";
     }
   }
-  if (levelFlash > 0) { context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0); context.globalAlpha = levelFlash * 0.35 / 0.16; context.fillStyle = "#fff4c7"; context.fillRect(0, 0, width, height); context.globalAlpha = 1; }
+
 }
 
 function frame(timestamp) {

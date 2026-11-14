@@ -1,21 +1,35 @@
-# Oturum raporu — 2026-11-13 (Peru, UTC-5)
+# Oturum raporu — 2026-11-14 (Peru, UTC-5)
 
-## Agent Sprite Forge kurulumu, varlık denemesi ve API kontrolü
+## FAZ 3 Tamamlandı: HUD, Ana Menü ve Animasyon Düzeltmeleri
 
-Bu oturumdaki ayrı işin ayrıntılı kaydı: [Agent Sprite Forge oturum raporu](reports/2026-11-13-agent-sprite-forge-session.md).
+Bu oturumda FIVEMORE projesi için Faz 3 tamamlanmış ve ADIM A, B, C, D adımları başarıyla uygulanmıştır. Ayrıntılı raporlar `reports/` klasörü altında bulunabilir:
+- [Faz 3.1 ve Adım A-D Raporu](reports/2026-11-14-phase3-1.md)
+- [Faz 3.2 Ana Menü Tasarım Raporu](reports/2026-11-14-phase3-2.md)
 
-Repo dışına Agent Sprite Forge skill klasörleri kuruldu ve `/tmp/anim-test/` altında iki piksel sheet’i ile manifest üretildi. Codex görsel route’u bu oturumda kullanılamadı; Gemini görüntü istekleri kota/kimlik doğrulama hatası verdi. Salt-okunur Gemini `models.list` kontrolü yalnızca ikinci anahtarın `l` → `I` varyantında HTTP 200 döndürdü. Kullanıcının talebiyle o varyant `.env.local` içine yerel ve ignore edilmiş biçimde kaydedildi; commit’e alınmıyor.
+### Yapılan Çalışmalar
 
-FIVEMORE oyun kodu ve `assets/` değişmedi. Commit kapsamı bu iki rapor belgesi ve proje yönergesinin gerektirdiği tek satırlık changelog kaydıdır.
+1. **ADIM A (Animasyon Kare Aralıkları):**
+   - Survivor ve zombi sprite sheet'lerinde yürüme döngüsünün hasar ve ölüm karelerini göstermesine neden olan `count - 2` / `frames - 2` mantığı düzeltildi.
+   - `src/config.js` içinde `PLAYER_ANIMATION` (yürüme 0-3, durma 0. kare, ölüm 8. kare) ve `ENEMY_WALK_ANIMATIONS` (0-3 arası kareler) tanımlandı.
+   - `src/scene.js` ve `src/enemies.js` bu aralıklara bağlandı. `window.__gameDebug.getPlayerFrame` eklendi.
 
-## Önceki gameplay rapor özeti
+2. **ADIM B (Ekran Flaşı Kaldırılması):**
+   - Seviye atlandığında tüm ekranı dolduran krem rengi flaş (`levelFlash`) `src/scene.js` içinden tamamen kaldırıldı; sadece genişleyen seviye halkası korundu.
 
-The latest gameplay work is documented in [the detailed aim, obstacle and survivor-size report](reports/2026-11-13-aim-obstacles-visual-size.md). Four task commits widened aim assist to 15°, removed the white inner muzzle flash, added circular prop collision for players and zombies, and increased survivor draw size while keeping its collider fixed.
+3. **ADIM C (Sayısal Ayarlar):**
+   - `src/config.js` içinde `AIM_ASSIST_DEG` 15 → 20 dereceye çıkarıldı.
+   - `ARENA_H` 2000 → 2800 birime genişletildi (ARENA_W 1600 kaldı). Oyuncunun arena sınırları içinde kaldığı ve kenar çizgisinin düzgün göründüğü doğrulandı.
 
-Playwright verification ran at 390×844. The player stopped 30 world units from the tested tree center (28 required), the zombie stopped 30.4167 units away (30 required), and the bullet trajectory toward a target at 14° measured 14.0362°. Canvas size, audio startup, enemy approach, contact damage, gem pickup, and the 30-second enemy-count check were also recorded with verbatim output in the detailed report. One randomized repeat showed a largest enemy-count drop of 1; the documented repeat showed 0.
+4. **ADIM D / FAZ 3.1 (Piksel Stil HUD):**
+   - HP barı, XP/seviye barı ve süre göstergesi piksel sanat stiline (`styles.css` ve `index.html`) uyarlandı: kalın koyu konturlar (`#0a090d`), sprite paleti renk geçişleri, net okunaklı LV ve HP sayıları, 48×48 duraklatma tuşu korundu.
 
-Screenshots: [baseline](reports/screenshots/baseline.png), [gameplay with aim and obstacle scenario](reports/screenshots/2026-11-13-final-gameplay.png), and [30-second repeat](reports/screenshots/after-repeat.png).
+5. **FAZ 3.2 (Ana Menü Yeniden Tasarımı):**
+   - Retro arcade piksel tipografi başlık (`#game-title`), arkada v2 zemin dokusu (`grass_tiles_spritesheet.png`) ve v2 survivor/zombi sprite'ları (`survivor_refined_spritesheet.png`, `walker_refined_spritesheet.png`) ile ana menü tamamen yenilendi.
+   - Büyük dokunmatik dostu butonlar (56px) ve arcade gölgeleri eklendi.
 
-**UNVERIFIED:** Physical iPhone 11 Safari behavior. Live projectile pass-through was not separately instrumented; projectile code has no obstacle collision check.
+## Doğrulama (Playwright 390x844)
+- `node reports/playwright-gameplay.cjs phase3-2-after` komutu ile testler koşturuldu ve çıkış kodu 0 oldu.
+- Ekran görüntüleri `reports/screenshots/phase3-1-after.png` ve `reports/screenshots/phase3-2-after.png` altına kaydedildi.
+- Konsol hatası bulunmadı; AudioContext başarıyla çalışıyor (`running · gain 0.70`).
 
-Earlier work: [coordinate bug-fix measurements](reports/2026-11-13-coordinate-bug-fixes.md), [v2 asset import report](reports/2026-11-13-v2-assets-import.md).
+**UNVERIFIED:** Fiziksel iPhone 11 Safari dokunmatik testleri raporlarda UNVERIFIED olarak kalmaktadır.
